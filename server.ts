@@ -593,11 +593,29 @@ function saveDB(db: Database) {
 
 export const app = express();
 
-async function startServer() {
-  app.use(express.json());
+// Initialize DB synchronously
+getDB();
 
-  // Initialize DB
-  getDB();
+app.use(express.json());
+
+// Global CORS headers for Vercel and custom domains
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Middleware to normalize /api prefix on Vercel
+app.use((req, res, next) => {
+  if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && !req.url.startsWith('/@') && !req.url.includes('.')) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
 
   // ----------------------------------------
   // USER API ROUTES
@@ -2072,44 +2090,49 @@ function cleanYouTubeUrl(rawUrl: string): string {
   // ----------------------------------------
   // INTEGRATE VITE FOR DEV / PRODUCTION SERVING
   // ----------------------------------------
-  const isProd = (process.env.NODE_ENV === 'production' || process.env.VERCEL) && fs.existsSync(path.resolve(__dirname, 'dist/index.html'));
-  if (!isProd) {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'custom'
-    });
-    app.use(vite.middlewares);
+  async function startServer() {
+    if (process.env.VERCEL) {
+      // Vercel serverless environment handles routing via api/index.ts.
+      // Static assets are served directly by Vercel Edge CDN. Do not initialize Vite dev server.
+      return;
+    }
 
-    app.use('*', async (req, res, next) => {
-      const url = req.originalUrl;
-      if (url.startsWith('/api')) {
-        return res.status(404).json({ success: false, message: 'এপিআই রুটটি পাওয়া যায়নি।' });
-      }
-      try {
-        let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
-        template = await vite.transformIndexHtml(url, template);
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-      } catch (e) {
-        vite.ssrFixStacktrace(e as Error);
-        next(e);
-      }
-    });
-  } else {
-    // Serve production static assets
-    app.use(express.static(path.resolve(__dirname, 'dist')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, 'dist/index.html'));
-    });
-  }
+    const isProd = process.env.NODE_ENV === 'production' && fs.existsSync(path.resolve(__dirname, 'dist/index.html'));
+    if (!isProd) {
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'custom'
+      });
+      app.use(vite.middlewares);
 
-  if (!process.env.VERCEL) {
+      app.use('*', async (req, res, next) => {
+        const url = req.originalUrl;
+        if (url.startsWith('/api')) {
+          return res.status(404).json({ success: false, message: 'এপিআই রুটটি পাওয়া যায়নি।' });
+        }
+        try {
+          let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
+          template = await vite.transformIndexHtml(url, template);
+          res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+        } catch (e) {
+          vite.ssrFixStacktrace(e as Error);
+          next(e);
+        }
+      });
+    } else {
+      // Serve production static assets
+      app.use(express.static(path.resolve(__dirname, 'dist')));
+      app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'dist/index.html'));
+      });
+    }
+
     const port = process.env.PORT || 3000;
     app.listen(port, () => {
       console.log(`[VidEarn] Server running successfully on port ${port}`);
     });
   }
-}
 
-startServer();
+  startServer();
 
-export default app;
+  export default app;

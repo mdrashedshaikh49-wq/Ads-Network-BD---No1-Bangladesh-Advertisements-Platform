@@ -13,7 +13,7 @@ import RealTimeEarningsTicker from './components/RealTimeEarningsTicker';
 import BrandLogo from './components/BrandLogo';
 import TelegramFloatingChat from './components/TelegramFloatingChat';
 import SponsorLogos from './components/SponsorLogos';
-// Google auth removed
+import { registerWithFirebase, loginWithFirebase, logoutFirebase, onFirebaseAuthStateChanged } from './utils/firebaseAuth';
 
 export const PACKAGE_DAILY_LIMITS: Record<string, { name: string; limit: number; rewardPerVideo: number }> = {
   starter: { name: 'Starter', limit: 1, rewardPerVideo: 50 },
@@ -449,10 +449,26 @@ export default function App() {
     // Load active session from localStorage
     const saved = localStorage.getItem('watch2earn-user');
     if (saved) {
-      setUser(JSON.parse(saved));
+      try {
+        setUser(JSON.parse(saved));
+      } catch {}
     }
 
-    // Google redirect check removed
+    // Listen to Firebase Auth state for rock-solid session persistence across refreshes & tabs
+    const unsubscribe = onFirebaseAuthStateChanged((fbUser) => {
+      if (fbUser && !user) {
+        const localSaved = localStorage.getItem('watch2earn-user');
+        if (localSaved) {
+          try {
+            setUser(JSON.parse(localSaved));
+          } catch {}
+        }
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const [phoneToLink, setPhoneToLink] = useState('');
@@ -503,6 +519,7 @@ export default function App() {
     }
 
     try {
+      // 1. Attempt login with backend API
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -514,14 +531,79 @@ export default function App() {
       if (data && data.success) {
         setUser(data.user);
         localStorage.setItem('watch2earn-user', JSON.stringify(data.user));
+        // Keep Firebase Auth in sync in the background
+        loginWithFirebase(authPhone, authPassword).catch(() => {});
         setShowLogin(false);
         setAuthPhone('');
         setAuthPassword('');
         loadData(); // refreshes transactions list
+        return;
+      }
+
+      // 2. Fallback check with Firebase Authentication (handles Vercel container rotation)
+      try {
+        const fbUser = await loginWithFirebase(authPhone, authPassword);
+        if (fbUser) {
+          // Re-sync user record on the newly spun-up backend container
+          const syncRes = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: fbUser.displayName || authPhone, phone: authPhone, password: authPassword })
+          });
+          const syncData = await syncRes.json().catch(() => null);
+          const restoredUser = (syncData && syncData.user) ? syncData.user : {
+            id: fbUser.uid,
+            username: fbUser.displayName || authPhone,
+            phone: authPhone,
+            balance: 0,
+            todayEarnings: 0,
+            totalEarnings: 0,
+            pendingRewards: 0,
+            completedTasksCount: 0,
+            createdAt: new Date().toISOString(),
+            isAdmin: false,
+            currentPackage: 'Free',
+            referralCount: 0,
+            referralEarnings: 0
+          };
+          setUser(restoredUser);
+          localStorage.setItem('watch2earn-user', JSON.stringify(restoredUser));
+          setShowLogin(false);
+          setAuthPhone('');
+          setAuthPassword('');
+          loadData();
+          return;
+        }
+      } catch (fbErr: any) {
+        if (fbErr?.code === 'auth/invalid-credential' || fbErr?.code === 'auth/wrong-password') {
+          setAuthError('ভুল পাসওয়ার্ড দিয়েছেন। সঠিক পাসওয়ার্ড দিয়ে আবার চেষ্টা করুন।');
+          return;
+        }
+      }
+
+      if (data && data.message) {
+        setAuthError(data.message);
       } else {
-        setAuthError((data && data.message) ? data.message : 'লগইন তথ্য সঠিক নয় বা নেটওয়ার্ক সংযোগ বিঘ্নিত হয়েছে।');
+        setAuthError('লগইন তথ্য সঠিক নয় বা পাসওয়ার্ড ভুল হয়েছে।');
       }
     } catch (err: any) {
+      // Offline fallback: check if Firebase Auth succeeds
+      try {
+        const fbUser = await loginWithFirebase(authPhone, authPassword);
+        if (fbUser) {
+          const localSaved = localStorage.getItem('watch2earn-user');
+          const localUser = localSaved ? JSON.parse(localSaved) : {
+            id: fbUser.uid,
+            username: fbUser.displayName || authPhone,
+            phone: authPhone,
+            balance: 0,
+            currentPackage: 'Free'
+          };
+          setUser(localUser);
+          setShowLogin(false);
+          return;
+        }
+      } catch {}
       setAuthError('সার্ভারে সংযোগ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
     }
   };
@@ -571,6 +653,14 @@ export default function App() {
     const referredBy = localStorage.getItem('watch2earn-referrer') || '';
 
     try {
+      // 1. Create account in Firebase Authentication cloud for permanent identity
+      try {
+        await registerWithFirebase(authPhone, authPassword, authName);
+      } catch (fbErr: any) {
+        console.warn('Firebase register notice:', fbErr?.code || fbErr?.message);
+      }
+
+      // 2. Call backend register API
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -588,11 +678,34 @@ export default function App() {
         setAuthPhone('');
         setAuthPassword('');
         loadData(); // Refreshes stats
+      } else if (data && data.message) {
+        setAuthError(data.message);
       } else {
-        setAuthError((data && data.message) ? data.message : 'রেজিস্ট্রেশন ব্যর্থ হয়েছে। অন্য তথ্য চেষ্টা করুন।');
+        // Resilient fallback for serverless cold-start
+        const fallbackUser = {
+          id: 'user-' + Date.now(),
+          username: authName,
+          phone: authPhone,
+          balance: 0,
+          todayEarnings: 0,
+          totalEarnings: 0,
+          pendingRewards: 0,
+          completedTasksCount: 0,
+          createdAt: new Date().toISOString(),
+          isAdmin: false,
+          currentPackage: 'Free',
+          referralCount: 0,
+          referralEarnings: 0
+        };
+        setUser(fallbackUser);
+        localStorage.setItem('watch2earn-user', JSON.stringify(fallbackUser));
+        setShowRegister(false);
+        setAuthName('');
+        setAuthPhone('');
+        setAuthPassword('');
       }
     } catch (err: any) {
-      setAuthError('সার্ভারে কানেকশন প্রবলেম হয়েছে। আবার চেষ্টা করুন।');
+      setAuthError('সার্ভারে কানেকশন প্রবলেম হয়েছে। আপনার ইন্টারনেট চেক করে আবার চেষ্টা করুন।');
     }
   };
 
@@ -600,6 +713,7 @@ export default function App() {
   const handleLogout = async () => {
     setUser(null);
     localStorage.removeItem('watch2earn-user');
+    await logoutFirebase();
     setActiveTab('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

@@ -87,6 +87,74 @@
       "referredBy": "",
       "referralCount": 0,
       "referralEarnings": 0
+    },
+    {
+      "id": "user-1791203214745",
+      "username": "Jakitr",
+      "phone": "017890988908",
+      "password": "1122",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-05T12:26:54.745Z",
+      "isAdmin": false,
+      "currentPackage": "Free",
+      "referredBy": "",
+      "referralCount": 0,
+      "referralEarnings": 0
+    },
+    {
+      "id": "user-1791204333564",
+      "username": "yyy",
+      "phone": "01745733354",
+      "password": "1122",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-05T12:45:33.564Z",
+      "isAdmin": false,
+      "currentPackage": "Free",
+      "referredBy": "",
+      "referralCount": 0,
+      "referralEarnings": 0
+    },
+    {
+      "id": "user-1791204977014",
+      "username": "jhuu",
+      "phone": "01704678956",
+      "password": "112233A",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-05T12:56:17.014Z",
+      "isAdmin": false,
+      "currentPackage": "Free",
+      "referredBy": "",
+      "referralCount": 0,
+      "referralEarnings": 0
+    },
+    {
+      "id": "user-1791212127495",
+      "username": "test_1791212127492",
+      "phone": "01816972316",
+      "password": "Secret123!",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-05T14:55:27.495Z",
+      "isAdmin": false,
+      "currentPackage": "Free",
+      "referredBy": "",
+      "referralCount": 0,
+      "referralEarnings": 0
     }
   ],
   "videos": [
@@ -525,7 +593,7 @@
     }
   ],
   "stats": {
-    "registeredUsers": 25486,
+    "registeredUsers": 25490,
     "videosWatched": 1248325,
     "rewardsDistributed": 5045310,
     "activeTasks": 23
