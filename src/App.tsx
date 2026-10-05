@@ -517,12 +517,55 @@ export default function App() {
   const handleGoogleSignIn = async () => {
     setAuthError(null);
     try {
-      await signInWithGoogle();
+      const gUser = await signInWithGoogle();
+      if (!gUser) {
+        // Fallback redirect flow triggered, page is redirecting
+        return;
+      }
+
+      const referredBy = localStorage.getItem('watch2earn-referrer') || '';
+
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: gUser.email,
+          displayName: gUser.displayName,
+          googleId: gUser.uid,
+          referredBy
+        })
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (data && data.success) {
+        setUser(data.user);
+        localStorage.setItem('watch2earn-user', JSON.stringify(data.user));
+        localStorage.removeItem('watch2earn-referrer'); // clear referrer
+        setShowLogin(false);
+        setShowRegister(false);
+        loadData(); // refresh transactions list and stats
+      } else {
+        setAuthError((data && data.message) ? data.message : 'গুগল সাইন ইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
+      }
     } catch (err: any) {
       console.error('Google Sign In Error:', err);
       const errorCode = err?.code || '';
       const errorMsg = err?.message || '';
-      setAuthError(`গুগল সাইন ইন ত্রুটি (${errorCode || 'Error'}): ${errorMsg || 'আবার চেষ্টা করুন।'}`);
+
+      if (errorCode === 'auth/unauthorized-domain') {
+        setAuthError(`ডোমেন অনুমোদিত নয়! দয়া করে আপনার Firebase Console -> Authentication -> Settings -> Authorized Domains-এ গিয়ে "${window.location.hostname}" ডোমেনটি যুক্ত করুন।`);
+      } else if (errorCode === 'auth/popup-blocked') {
+        setAuthError('পপ-আপ ব্লক করা হয়েছে! আপনার ব্রাউজার সেটিংস থেকে পপ-আপ অ্যালাউ (Allow) করুন এবং আবার চেষ্টা করুন।');
+      } else if (errorCode === 'auth/popup-closed-by-user') {
+        setAuthError('লগইন পপ-আপ উইন্ডোটি আপনি বন্ধ করে দিয়েছেন। সম্পূর্ণ লগইন করতে আবার ক্লিক করুন।');
+      } else if (errorCode === 'auth/operation-not-allowed') {
+        setAuthError('গুগল সাইন-ইন সক্রিয় নেই! দয়া করে Firebase Console -> Authentication -> Sign-in method-এ গিয়ে Google প্রোভাইডারটি এনাবল (Enable) করুন।');
+      } else if (errorCode === 'auth/network-request-failed') {
+        setAuthError('নেটওয়ার্ক সংযোগ বিঘ্নিত হয়েছে। আপনার ইন্টারনেট কানেকশন চেক করে আবার চেষ্টা করুন।');
+      } else {
+        setAuthError(`গুগল সাইন ইন ত্রুটি (${errorCode || 'Error'}): ${errorMsg || 'আবার চেষ্টা করুন।'}`);
+      }
     }
   };
 
