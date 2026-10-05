@@ -13,6 +13,7 @@ import RealTimeEarningsTicker from './components/RealTimeEarningsTicker';
 import BrandLogo from './components/BrandLogo';
 import TelegramFloatingChat from './components/TelegramFloatingChat';
 import SponsorLogos from './components/SponsorLogos';
+import BackgroundMusicPlayer from './components/BackgroundMusicPlayer';
 import { registerWithFirebase, loginWithFirebase, logoutFirebase, onFirebaseAuthStateChanged } from './utils/firebaseAuth';
 
 export const PACKAGE_DAILY_LIMITS: Record<string, { name: string; limit: number; rewardPerVideo: number }> = {
@@ -1464,6 +1465,11 @@ export default function App() {
           </button>
         )}
       </div>
+
+      {/* ----------------------------------------
+          BACKGROUND MUSIC PLAYER (AUTOPLAY)
+          ---------------------------------------- */}
+      <BackgroundMusicPlayer />
 
       {/* ----------------------------------------
           TELEGRAM FLOATING SUPPORT & UPDATES CHAT

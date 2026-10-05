@@ -138,12 +138,20 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
     if (currentVideos && currentVideos.length > 0) {
       if (!selectedVideo || !currentVideos.some(v => v.id === selectedVideo.id)) {
         setSelectedVideo(currentVideos[0]);
-        setIsPreviewPlaying(false);
+      } else {
+        setSelectedVideo(null);
       }
-    } else {
-      setSelectedVideo(null);
     }
   }, [effectiveTab, videos]);
+
+  // Synchronize with background music player so it pauses while watching videos
+  useEffect(() => {
+    if (isWatching || isPreviewPlaying || inlinePlayingVideoId) {
+      window.dispatchEvent(new CustomEvent('watch2earn:video-playing'));
+    } else {
+      window.dispatchEvent(new CustomEvent('watch2earn:video-paused'));
+    }
+  }, [isWatching, isPreviewPlaying, inlinePlayingVideoId]);
 
   // Handle Start Watch Session
   const handleStartWatching = async (vid: Video, vidIndex?: number) => {
