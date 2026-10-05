@@ -308,7 +308,7 @@ export default function FaqsAndFooter({
                 +৮৮০ ১৭১২ ৩৪৫৬৭৮
               </p>
               <a 
-                href="https://t.me/adsnetworkbangladesh"
+                href="https://t.me/Ads_NetworkBangladesh"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 hover:text-white transition-colors text-sky-400 font-bold"

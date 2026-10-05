@@ -82,7 +82,7 @@ export default function TelegramFloatingChat() {
   const channelEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const channelLink = "https://t.me/adsnetworkbangladesh";
+  const channelLink = "https://t.me/Ads_NetworkBangladesh";
 
   // Female support agents data with imported image paths and handcrafted SVG fallbacks
   const AGENTS: Agent[] = [
