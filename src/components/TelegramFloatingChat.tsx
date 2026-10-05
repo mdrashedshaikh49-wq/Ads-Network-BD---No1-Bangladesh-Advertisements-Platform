@@ -82,7 +82,8 @@ export default function TelegramFloatingChat() {
   const channelEndRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
 
-  const channelLink = "https://t.me/Ads_NetworkBangladesh";
+  const chatSupportLink = "https://t.me/Ads_NetworkBangladesh";
+  const channelLink = "https://t.me/adsnetworkbangladesh";
 
   // Female support agents data with imported image paths and handcrafted SVG fallbacks
   const AGENTS: Agent[] = [
@@ -248,7 +249,7 @@ export default function TelegramFloatingChat() {
       label: '৪. সরাসরি এডমিন সাপোর্ট দরকার',
       response: 'কোনো চিন্তা করবেন না! আমাদের টেলিগ্রাম গ্রুপ ও চ্যানেলে সরাসরি ২ জন প্রধান এডমিন এবং সাপোর্ট টিম ২৪ ঘণ্টা সক্রিয় আছেন। আপনার যেকোনো পেমেন্ট বা টেকনিক্যাল সমস্যা সমাধানে চ্যানেল লিংকে ক্লিক করে আমাদের ইনবক্সে নক দিন।',
       ctaText: '👉 সরাসরি এডমিনকে নক দিন',
-      ctaUrl: channelLink
+      ctaUrl: chatSupportLink
     }
   ];
 

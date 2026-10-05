@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, CheckCircle, Sparkles } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Sponsor {
   id: string;
@@ -10,6 +11,7 @@ interface Sponsor {
 
 export default function SponsorLogos() {
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
+  const { isBn } = useLanguage();
 
   const sponsors: Sponsor[] = [
     {
@@ -86,15 +88,17 @@ export default function SponsorLogos() {
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-2">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-800 rounded-full border border-blue-100 text-xs font-black uppercase tracking-wider">
             <Shield className="w-3.5 h-3.5 text-blue-700" />
-            Corporate Partners
+            {isBn ? 'Corporate Partners' : 'Our Media Partners'}
           </div>
           
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
-            অফিসিয়াল বাণিজ্যিক স্পন্সর ও মিডিয়া পার্টনার
+            {isBn ? 'অফিসিয়াল বাণিজ্যিক স্পন্সর ও মিডিয়া পার্টনার' : 'Official Commercial Sponsors & Media Partners'}
           </h2>
           
           <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">
-            Ads Network BD-এর সাথে বিজ্ঞাপন প্রচারে সরাসরি চুক্তিবদ্ধ দেশের শীর্ষস্থানীয় কর্পোরেট ব্র্যান্ড ও জাতীয় প্রচার সংস্থাসমূহ।
+            {isBn 
+              ? 'Ads Network BD-এর সাথে বিজ্ঞাপন প্রচারে সরাসরি চুক্তিবদ্ধ দেশের শীর্ষস্থানীয় কর্পোরেট ব্র্যান্ড ও জাতীয় প্রচার সংস্থাসমূহ।' 
+              : 'Leading corporate brands and national broadcasters directly contracted for ad campaigns with Ads Network BD.'}
           </p>
         </div>
 
@@ -102,6 +106,7 @@ export default function SponsorLogos() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-4 items-stretch justify-center">
           {sponsors.map((sponsor) => {
             const hasError = logoErrors[sponsor.id];
+            const displayName = isBn ? sponsor.bnName : sponsor.name;
             return (
               <div
                 key={sponsor.id}
@@ -115,7 +120,7 @@ export default function SponsorLogos() {
                       {sponsor.name.split(' ')[0]}
                     </span>
                     <span className="text-[9px] font-bold text-slate-400">
-                      {sponsor.bnName}
+                      {displayName}
                     </span>
                   </div>
                 ) : (
@@ -144,7 +149,11 @@ export default function SponsorLogos() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span>১০০% অনুমোদিত অংশীদারিত্ব: আমাদের সকল বিজ্ঞাপনদাতাদের পেমেন্ট এবং কর্পোরেট ট্যাক্স সরাসরি সরকারি প্রোটোকল মেনে লেনদেন করা হয়।</span>
+            <span>
+              {isBn 
+                ? '১০০% অনুমোদিত অংশীদারিত্ব: আমাদের সকল বিজ্ঞাপনদাতাদের পেমেন্ট এবং কর্পোরেট ট্যাক্স সরাসরি সরকারি প্রোটোকল মেনে লেনদেন করা হয়।' 
+                : '100% Verified Partnership: All client payments and corporate taxes are directly processed in adherence with government legal protocols.'}
+            </span>
           </div>
         </div>
 

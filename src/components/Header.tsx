@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, Wallet, User, ShieldCheck, LogOut } from 'lucide-react';
 import BrandLogo from './BrandLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HeaderProps {
   user: any;
@@ -22,17 +23,18 @@ export default function Header({
   setActiveTab
 }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { language, toggleLanguage, isBn } = useLanguage();
 
   const navItems = [
-    { id: 'home', label: 'হোম' },
-    { id: 'how-it-works', label: 'কিভাবে কাজ করে' },
-    { id: 'watch-earn', label: 'বিজ্ঞাপন দেখুন' },
-    { id: 'packages', label: 'প্যাকেজসমূহ' },
-    { id: 'advertise', label: 'বিজ্ঞাপন দিন' },
-    { id: 'payment-proofs', label: 'পেমেন্ট প্রুফ' },
-    { id: 'trust-legal', label: 'আইনি তথ্য' },
-    { id: 'rewards', label: 'পুরস্কারসমূহ' },
-    { id: 'faq', label: 'জিজ্ঞাসাবাদ' },
+    { id: 'home', label: isBn ? 'হোম' : 'Home' },
+    { id: 'how-it-works', label: isBn ? 'কিভাবে কাজ করে' : 'How It Works' },
+    { id: 'watch-earn', label: isBn ? 'বিজ্ঞাপন দেখুন' : 'Watch Ads' },
+    { id: 'packages', label: isBn ? 'প্যাকেজসমূহ' : 'Packages' },
+    { id: 'advertise', label: isBn ? 'বিজ্ঞাপন দিন' : 'Advertise' },
+    { id: 'payment-proofs', label: isBn ? 'পেমেন্ট প্রুফ' : 'Payment Proofs' },
+    { id: 'trust-legal', label: isBn ? 'আইনি তথ্য' : 'Legal Info' },
+    { id: 'rewards', label: isBn ? 'পুরস্কারসমূহ' : 'Rewards' },
+    { id: 'faq', label: isBn ? 'জিজ্ঞাসাবাদ' : 'FAQ' },
   ];
 
   return (
@@ -63,7 +65,7 @@ export default function Header({
               />
             </a>
             <span className="hidden xl:inline-block text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-sm font-mono shrink-0">
-              OFFICIAL
+              {isBn ? 'অফিসিয়াল' : 'OFFICIAL'}
             </span>
           </div>
 
@@ -93,6 +95,16 @@ export default function Header({
 
           {/* Right side Actions */}
           <div className="hidden lg:flex items-center gap-4">
+            {/* Desktop Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-black text-slate-700 hover:text-blue-700 hover:border-blue-300 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-xl transition-all cursor-pointer"
+              title={isBn ? "Switch to English" : "বাংলায় পরিবর্তন করুন"}
+            >
+              <span className="text-sm">{isBn ? "🇺🇸" : "🇧🇩"}</span>
+              <span>{isBn ? "EN" : "বাংলা"}</span>
+            </button>
+
             {user ? (
               <div className="flex items-center gap-3">
                 {/* Admin Switch */}
@@ -102,7 +114,7 @@ export default function Header({
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors"
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    অ্যাডমিন প্যানেল
+                    {isBn ? 'অ্যাডমিন প্যানেল' : 'Admin Panel'}
                   </button>
                 )}
 
@@ -120,7 +132,7 @@ export default function Header({
                   <button
                     onClick={onLogout}
                     className="p-2 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
-                    title="লগআউট করুন"
+                    title={isBn ? "লগআউট করুন" : "Logout"}
                   >
                     <LogOut className="w-4 h-4" />
                   </button>
@@ -132,20 +144,30 @@ export default function Header({
                   onClick={onOpenLogin}
                   className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors cursor-pointer"
                 >
-                  লগইন
+                  {isBn ? 'লগইন' : 'Login'}
                 </button>
                 <button
                   onClick={onOpenRegister}
                   className="px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-[var(--brand-primary-start)] to-[var(--brand-primary-end)] rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer whitespace-nowrap"
                 >
-                  শুরু করুন
+                  {isBn ? 'শুরু করুন' : 'Get Started'}
                 </button>
               </div>
             )}
           </div>
 
-          {/* Mobile hamburger button */}
+          {/* Mobile actions and hamburger */}
           <div className="flex items-center gap-2 lg:hidden">
+            {/* Mobile Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-black text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg cursor-pointer"
+              title={isBn ? "Switch to English" : "বাংলায় পরিবর্তন করুন"}
+            >
+              <span className="text-xs">{isBn ? "🇺🇸" : "🇧🇩"}</span>
+              <span>{isBn ? "EN" : "বাংলা"}</span>
+            </button>
+
             {user && (
               <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 rounded-lg text-emerald-800 border border-emerald-100">
                 <span className="text-xs font-bold font-mono">৳{Number(user.balance).toLocaleString()}</span>
@@ -187,7 +209,7 @@ export default function Header({
               />
             </a>
             <span className="text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-sm font-mono">
-              OFFICIAL
+              {isBn ? 'অফিসিয়াল' : 'OFFICIAL'}
             </span>
           </div>
           {navItems.map((item) => (
@@ -220,11 +242,13 @@ export default function Header({
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-amber-600 rounded-lg hover:bg-amber-700"
                   >
                     <ShieldCheck className="w-4 h-4" />
-                    অ্যাডমিন প্যানেল
+                    {isBn ? 'অ্যাডমিন প্যানেল' : 'Admin Panel'}
                   </button>
                 )}
                 <div className="flex items-center justify-between px-3 py-2 bg-slate-50 rounded-lg">
-                  <span className="text-sm font-semibold text-slate-500">লগইন অ্যাকাউন্ট:</span>
+                  <span className="text-sm font-semibold text-slate-500">
+                    {isBn ? 'লগইন অ্যাকাউন্ট:' : 'Active Account:'}
+                  </span>
                   <span className="text-sm font-bold text-slate-800">{user.username}</span>
                 </div>
                 <button
@@ -235,7 +259,7 @@ export default function Header({
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-600 bg-red-50 rounded-lg hover:bg-red-100"
                 >
                   <LogOut className="w-4 h-4" />
-                  লগআউট করুন
+                  {isBn ? 'লগআউট করুন' : 'Logout'}
                 </button>
               </>
             ) : (
@@ -247,7 +271,7 @@ export default function Header({
                   }}
                   className="w-full px-4 py-2.5 text-center text-sm font-bold text-slate-700 hover:bg-slate-50 rounded-lg"
                 >
-                  লগইন
+                  {isBn ? 'লগইন' : 'Login'}
                 </button>
                 <button
                   onClick={() => {
@@ -256,7 +280,7 @@ export default function Header({
                   }}
                   className="w-full px-4 py-2.5 text-center text-sm font-bold text-white bg-gradient-to-r from-[var(--brand-primary-start)] to-[var(--brand-primary-end)] rounded-lg shadow-md"
                 >
-                  শুরু করুন
+                  {isBn ? 'শুরু করুন' : 'Get Started'}
                 </button>
               </>
             )}

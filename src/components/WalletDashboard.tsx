@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, Smartphone, Gift, ArrowRight, ShieldCheck, HelpCircle, CheckCircle, Clock, Share2, Copy, Check, Users } from 'lucide-react';
+import { Wallet, Smartphone, Gift, ArrowRight, ShieldCheck, HelpCircle, CheckCircle, Clock, Share2, Copy, Check, Users, Landmark } from 'lucide-react';
 import PaymentLogoBadge, { BKashLogo, NagadLogo, RocketLogo } from './PaymentLogos';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -9,9 +10,11 @@ interface Transaction {
   videoId?: string;
   videoTitle?: string;
   amount: number;
-  type: 'video' | 'withdrawal' | 'bonus';
+  type: 'video' | 'withdrawal' | 'bonus' | 'deposit';
   paymentMethod?: string;
   phone?: string;
+  packageName?: string;
+  packageKey?: string;
   completionTime: string;
   status: 'Pending' | 'Verified' | 'Credited' | 'Rejected';
   createdDate: string;
@@ -44,6 +47,7 @@ export default function WalletDashboard({
   const [bonusLoading, setBonusLoading] = useState(false);
   const [bonusSuccess, setBonusSuccess] = useState<string | null>(null);
   const [bonusError, setBonusError] = useState<string | null>(null);
+  const { isBn } = useLanguage();
 
   // Real-time Global Platform Payouts Ticker Data
   const globalPayouts = [
@@ -94,17 +98,17 @@ export default function WalletDashboard({
 
     const numAmount = parseFloat(amount);
     if (!phone || !amount) {
-      setErrorMsg('সবগুলো তথ্য সঠিকভাবে পূরণ করুন।');
+      setErrorMsg(isBn ? 'সবগুলো তথ্য সঠিকভাবে পূরণ করুন।' : 'Please fill out all fields correctly.');
       return;
     }
 
     if (isNaN(numAmount) || numAmount < 100) {
-      setErrorMsg('উইথড্র করার জন্য সর্বনিম্ন পরিমাণ ১০০ টাকা।');
+      setErrorMsg(isBn ? 'উইথড্র করার জন্য সর্বনিম্ন পরিমাণ ১০০ টাকা।' : 'Minimum withdrawal amount is ৳100 BDT.');
       return;
     }
 
     if (user.balance < numAmount) {
-      setErrorMsg('দুঃখিত, আপনার ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।');
+      setErrorMsg(isBn ? 'দুঃখিত, আপনার ওয়ালেটে পর্যাপ্ত ব্যালেন্স নেই।' : 'Sorry, you do not have sufficient balance in your wallet.');
       return;
     }
 
@@ -129,10 +133,10 @@ export default function WalletDashboard({
         setAmount('');
         onRefreshUser(); // Refreshes state and wallet balance instantly
       } else {
-        setErrorMsg(data.message || 'উইথড্র রিকোয়েস্ট ব্যর্থ হয়েছে।');
+        setErrorMsg(data.message || (isBn ? 'উইথড্র রিকোয়েস্ট ব্যর্থ হয়েছে।' : 'Withdrawal request failed.'));
       }
     } catch (err) {
-      setErrorMsg('সার্ভারের সাথে সংযোগ ত্রুটি। পরে চেষ্টা করুন।');
+      setErrorMsg(isBn ? 'সার্ভারের সাথে সংযোগ ত্রুটি। পরে চেষ্টা করুন।' : 'Server connection error. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -157,10 +161,10 @@ export default function WalletDashboard({
         setBonusSuccess(data.message);
         onRefreshUser(); // Update balance
       } else {
-        setBonusError(data.message || 'ডেইলি বোনাস পেতে টাস্ক সম্পন্ন করুন।');
+        setBonusError(data.message || (isBn ? 'ডেইলি বোনাস পেতে টাস্ক সম্পন্ন করুন।' : 'Complete tasks to get daily bonus.'));
       }
     } catch (err) {
-      setBonusError('সার্ভার সংযোগ বিচ্ছিন্ন। আবার চেষ্টা করুন।');
+      setBonusError(isBn ? 'সার্ভার সংযোগ বিচ্ছিন্ন। আবার চেষ্টা করুন।' : 'Server connection lost. Please try again.');
     } finally {
       setBonusLoading(false);
     }
@@ -180,7 +184,9 @@ export default function WalletDashboard({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
               </span>
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider font-mono">LIVE PAYOUT TICKER</span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider font-mono">
+                {isBn ? 'লাইভ উইথড্রয়ালস' : 'LIVE PAYOUT TICKER'}
+              </span>
             </div>
 
             {/* Dynamic Active Payout Item with Smooth Keyed Animation */}
@@ -191,21 +197,23 @@ export default function WalletDashboard({
                 className="w-7 h-7 rounded-full object-cover border border-slate-700 shrink-0" 
                 referrerPolicy="no-referrer"
               />
-              <div className="truncate">
-                <span className="font-extrabold text-white">{currentPayout.name}</span>
-                <span className="text-slate-400 text-[11px] ml-1">({currentPayout.district})</span>
+              <div className="truncate text-left">
+                <span className="font-extrabold text-white">{isBn ? currentPayout.name : 'Verified Member'}</span>
+                <span className="text-slate-400 text-[11px] ml-1">({isBn ? currentPayout.district : 'BD'})</span>
                 <span className="mx-1 text-slate-600">·</span>
                 <span className="px-2 py-0.5 bg-slate-800 rounded-md border border-slate-700/80 inline-flex items-center">
                   <PaymentLogoBadge method={currentPayout.method} className="w-4 h-4" />
                 </span>
-                <span className="ml-1.5 font-black text-emerald-400 font-mono text-sm">৳{currentPayout.amount.toLocaleString()}</span>
-                <span className="text-[10px] text-slate-400 ml-1.5 font-mono">({currentPayout.time})</span>
+                <span className="ml-1.5 font-black text-emerald-400 font-mono text-sm">৳{currentPayout.amount.toLocaleString(isBn ? 'bn-BD' : 'en-US')}</span>
+                <span className="text-[10px] text-slate-400 ml-1.5 font-mono">
+                  ({isBn ? currentPayout.time : currentPayout.time.replace('সেকেন্ড আগে', 's ago').replace('মিনিট আগে', 'm ago')})
+                </span>
               </div>
             </div>
 
             {/* Cumulative Platform Total Stat */}
             <div className="shrink-0 text-[10px] font-bold text-slate-400 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/50 hidden lg:block font-mono">
-              আজকের ক্যাশআউট: <span className="text-emerald-400 font-black">৳৩,৪৮,৫০০+</span>
+              {isBn ? 'আজকের ক্যাশআউট:' : 'Today Disbursed:'} <span className="text-emerald-400 font-black">৳৩,৪৮,৫০০+</span>
             </div>
 
           </div>
@@ -221,11 +229,13 @@ export default function WalletDashboard({
             </div>
 
             <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
-              লগইন করে আপনার রিয়েল ব্যালেন্স ও ড্যাশবোর্ড দেখুন
+              {isBn ? 'লগইন করে আপনার রিয়েল ব্যালেন্স ও ড্যাশবোর্ড দেখুন' : 'Log in to View Real Wallet Balance & Dashboard'}
             </h2>
             
             <p className="text-slate-500 mt-4 text-sm max-w-lg mx-auto leading-relaxed">
-              রেজিস্ট্রেশন করে সচল ওয়ালেট ড্যাশবোর্ড চালু করুন, আপনার দৈনন্দিন ও মোট উপার্জন ট্র্যাক করুন এবং নিরাপদে পেমেন্ট উইথড্র রিকোয়েস্ট করুন।
+              {isBn 
+                ? 'রেজিস্ট্রেশন করে সচল ওয়ালেট ড্যাশবোর্ড চালু করুন, আপনার দৈনন্দিন ও মোট উপার্জন ট্র্যাক করুন এবং নিরাপদে পেমেন্ট উইথড্র রিকোয়েস্ট করুন।' 
+                : 'Instantly tracking cumulative rewards, verifying transaction histories, and safely requesting secure payouts requires logging in.'}
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center mt-8">
@@ -233,13 +243,13 @@ export default function WalletDashboard({
                 onClick={onOpenLogin}
                 className="px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-[var(--brand-primary-start)] to-[var(--brand-primary-end)] rounded-xl shadow-md hover:opacity-95 transition-all cursor-pointer"
               >
-                লগইন করুন
+                {isBn ? 'লগইন করুন' : 'Log In'}
               </button>
               <button
                 onClick={onOpenRegister}
                 className="px-6 py-3 text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all cursor-pointer"
               >
-                নতুন অ্যাকাউন্ট খুলুন
+                {isBn ? 'নতুন অ্যাকাউন্ট খুলুন' : 'Create Free Account'}
               </button>
             </div>
           </div>
@@ -249,10 +259,10 @@ export default function WalletDashboard({
           <div className="space-y-12">
             
             {/* Header / Info Area */}
-            <div>
-              <span className="text-sm font-bold text-[var(--brand-primary-start)] uppercase tracking-wider">ড্যাশবোর্ড</span>
+            <div className="text-left">
+              <span className="text-sm font-bold text-[var(--brand-primary-start)] uppercase tracking-wider">{isBn ? 'ড্যাশবোর্ড' : 'Member Studio'}</span>
               <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-1">
-                আপনার ওয়ালেট ও উপার্জন ড্যাশবোর্ড
+                {isBn ? 'আপনার ওয়ালেট ও উপার্জন ড্যাশবোর্ড' : 'Your Personal Rewards Dashboard'}
               </h2>
             </div>
 
@@ -260,60 +270,68 @@ export default function WalletDashboard({
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               
               {/* Box 1 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between text-left">
                 <div>
-                  <p className="text-xs font-bold text-slate-400">উত্তোলনযোগ্য ব্যালেন্স</p>
+                  <p className="text-xs font-bold text-slate-400">{isBn ? 'উত্তোলনযোগ্য ব্যালেন্স' : 'Withdrawable Balance'}</p>
                   <p className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight mt-1">
-                    ৳{Number(user.balance).toLocaleString('bn-BD', { minimumFractionDigits: 2 })}
+                    ৳{Number(user.balance).toLocaleString(isBn ? 'bn-BD' : 'en-US', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <span className="text-[10px] text-emerald-600 font-bold mt-4 block">✓ সবসময় উইথড্র করা সম্ভব</span>
+                <span className="text-[10px] text-emerald-600 font-bold mt-4 block">
+                  ✓ {isBn ? 'সবসময় উইথড্র করা সম্ভব' : 'Available for cashout'}
+                </span>
               </div>
 
               {/* Box 2 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between text-left">
                 <div>
-                  <p className="text-xs font-bold text-slate-400">আজকের মোট উপার্জন</p>
+                  <p className="text-xs font-bold text-slate-400">{isBn ? 'আজকের মোট উপার্জন' : "Today's Revenue"}</p>
                   <p className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight mt-1">
-                    ৳{Number(user.todayEarnings).toLocaleString('bn-BD', { minimumFractionDigits: 2 })}
+                    ৳{Number(user.todayEarnings).toLocaleString(isBn ? 'bn-BD' : 'en-US', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <span className="text-[10px] text-blue-600 font-bold mt-4 block">আজকের কাজ: {todayVideosCompleted}টি সম্পন্ন</span>
+                <span className="text-[10px] text-blue-600 font-bold mt-4 block">
+                  {isBn ? `আজকের কাজ: ${todayVideosCompleted}টি সম্পন্ন` : `Completed: ${todayVideosCompleted} Ads`}
+                </span>
               </div>
 
               {/* Box 3 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between text-left">
                 <div>
-                  <p className="text-xs font-bold text-slate-400">সর্বমোট উপার্জিত টাকা</p>
+                  <p className="text-xs font-bold text-slate-400">{isBn ? 'সর্বমোট উপার্জিত টাকা' : 'Lifetime Earnings'}</p>
                   <p className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight mt-1">
-                    ৳{Number(user.totalEarnings).toLocaleString('bn-BD', { minimumFractionDigits: 2 })}
+                    ৳{Number(user.totalEarnings).toLocaleString(isBn ? 'bn-BD' : 'en-US', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <span className="text-[10px] text-purple-600 font-bold mt-4 block">জীবনকালীন মোট রিওয়ার্ড</span>
+                <span className="text-[10px] text-purple-600 font-bold mt-4 block">
+                  {isBn ? 'জীবনকালীন মোট রিওয়ার্ড' : 'Lifetime platform payout'}
+                </span>
               </div>
 
               {/* Box 4 */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs flex flex-col justify-between text-left">
                 <div>
-                  <p className="text-xs font-bold text-slate-400">প্রক্রিয়াধীন উইথড্র (Pending)</p>
+                  <p className="text-xs font-bold text-slate-400">{isBn ? 'প্রক্রিয়াধীন উইথড্র (Pending)' : 'Pending Payouts'}</p>
                   <p className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight mt-1">
-                    ৳{Number(user.pendingRewards).toLocaleString('bn-BD', { minimumFractionDigits: 2 })}
+                    ৳{Number(user.pendingRewards).toLocaleString(isBn ? 'bn-BD' : 'en-US', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
-                <span className="text-[10px] text-amber-600 font-bold mt-4 block">যাচাইকরণ প্রক্রিয়া সক্রিয়</span>
+                <span className="text-[10px] text-amber-600 font-bold mt-4 block">
+                  {isBn ? 'যাচাইকরণ প্রক্রিয়া সক্রিয়' : 'Under verification'}
+                </span>
               </div>
 
               {/* Box 5: Active Package Indicator */}
               <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full filter blur-lg" />
                 <div className="relative z-10 text-left">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">সক্রিয় মেম্বারশিপ</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{isBn ? 'সক্রিয় মেম্বারশিপ' : 'Active Plan'}</p>
                   <p className="text-xl font-black text-amber-400 uppercase tracking-wider mt-1.5 font-sans">
                     {user.currentPackage ? user.currentPackage.toUpperCase().replace('_', ' ') : 'FREE'}
                   </p>
                 </div>
                 <span className="text-[10px] text-slate-300 font-semibold mt-4 block relative z-10 text-left">
-                  সীমা: {todayVideosCompleted} / {
+                  {isBn ? 'সীমা:' : 'Limit:'} {todayVideosCompleted} / {
                     (() => {
                       const limits: Record<string, number> = {
                         starter: 1, basic: 2, standard: 5, silver: 8, gold: 12,
@@ -321,7 +339,7 @@ export default function WalletDashboard({
                       };
                       return limits[user.currentPackage || 'Free'] || 10;
                     })()
-                  }টি ভিডিও
+                  } {isBn ? 'টি ভিডিও' : 'Ads'}
                 </span>
               </div>
 
@@ -333,22 +351,26 @@ export default function WalletDashboard({
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 
                 {/* Left Progress Text */}
-                <div className="space-y-2">
+                <div className="space-y-2 text-left">
                   <span className="px-2.5 py-1 text-[10px] font-bold bg-amber-500 text-slate-900 rounded-full inline-flex items-center gap-1">
                     <Gift className="w-3.5 h-3.5" />
-                    দৈনিক বোনাস রিওয়ার্ড
+                    {isBn ? 'দৈনিক বোনাস রিওয়ার্ড' : 'Daily Watch Bonus'}
                   </span>
-                  <h3 className="text-xl md:text-2xl font-black">ডেইলি ওয়াচ বোনাস (Daily Watch Bonus)</h3>
+                  <h3 className="text-xl md:text-2xl font-black">
+                    {isBn ? 'ডেইলি ওয়াচ বোনাস (Daily Watch Bonus)' : 'Unlock Daily Watch Bonus'}
+                  </h3>
                   <p className="text-xs text-slate-300 leading-relaxed max-w-md">
-                    দৈনিক ১০টি ভিডিও টাস্ক সম্পন্ন করলেই সরাসরি বোনাস ব্যালেন্স ৳{dailyBonusAmount} ক্লেইম করার সুযোগ সক্রিয় হবে।
+                    {isBn 
+                      ? `দৈনিক ১০টি ভিডিও টাস্ক সম্পন্ন করলেই সরাসরি বোনাস ব্যালেন্স ৳${dailyBonusAmount} ক্লেইম করার সুযোগ সক্রিয় হবে।` 
+                      : `Complete at least 10 video tasks today to instantly unlock a bonus cash reward of ৳${dailyBonusAmount} BDT.`}
                   </p>
                 </div>
 
                 {/* Progress bar and counter */}
-                <div className="bg-white/10 p-4 rounded-2xl border border-white/10 min-w-[280px]">
+                <div className="bg-white/10 p-4 rounded-2xl border border-white/10 min-w-[280px] text-left">
                   <div className="flex justify-between items-center text-xs font-bold mb-2">
-                    <span>আজকের অগ্রগতি (Progress)</span>
-                    <span className="font-mono">{todayVideosCompleted} / {requiredCount}টি</span>
+                    <span>{isBn ? 'আজকের অগ্রগতি (Progress)' : 'Today Progress'}</span>
+                    <span className="font-mono">{todayVideosCompleted} / {requiredCount}</span>
                   </div>
                   <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden">
                     <div 
@@ -357,8 +379,8 @@ export default function WalletDashboard({
                     />
                   </div>
                   <div className="flex justify-between items-center mt-2.5 text-[10px] text-slate-300 font-semibold">
-                    <span>অগ্রগতি: {progressPercent}%</span>
-                    <span>বোনাস মূল্য: ৳{dailyBonusAmount}</span>
+                    <span>{isBn ? 'অগ্রগতি:' : 'Progress:'} {progressPercent}%</span>
+                    <span>{isBn ? 'বোনাস মূল্য:' : 'Bonus Reward:'} ৳{dailyBonusAmount}</span>
                   </div>
                 </div>
 
@@ -369,7 +391,7 @@ export default function WalletDashboard({
                     disabled={bonusLoading}
                     className="px-6 py-3.5 text-sm font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {bonusLoading ? 'দাবি প্রসেস হচ্ছে...' : 'বোনাস দাবি করুন (Claim)'}
+                    {bonusLoading ? (isBn ? 'দাবি প্রসেস হচ্ছে...' : 'Processing Claim...') : (isBn ? 'বোনাস দাবি করুন (Claim)' : 'Claim Daily Bonus')}
                   </button>
                   {bonusSuccess && <span className="text-xs text-green-400 text-center font-bold">✓ {bonusSuccess}</span>}
                   {bonusError && <span className="text-xs text-amber-400 text-center font-bold">⚠ {bonusError}</span>}
@@ -391,9 +413,13 @@ export default function WalletDashboard({
                     <Share2 className="w-3 h-3" />
                     Referral Link Program
                   </span>
-                  <h3 className="text-xl md:text-2xl font-black">🎁 বন্ধুদের ইনভাইট করে আনলিমিটেড আয় করুন!</h3>
+                  <h3 className="text-xl md:text-2xl font-black">
+                    {isBn ? '🎁 বন্ধুদের ইনভাইট করে আনলিমিটেড আয় করুন!' : '🎁 Invite Friends & Earn Unlimited Bonuses!'}
+                  </h3>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    আপনার পার্সোনাল রেফারেল লিঙ্ক শেয়ার করুন। আপনার লিঙ্ক ব্যবহার করে কেউ রেজিস্ট্রেশন করলেই আপনার ওয়ালেটে সরাসরি **৳৫০ বোনাস** যোগ হবে! কোনো দৈনিক লিমিট নেই, যত খুশি রেফার করুন।
+                    {isBn 
+                      ? 'আপনার পার্সোনাল রেফারেল লিঙ্ক শেয়ার করুন। আপনার লিঙ্ক ব্যবহার করে কেউ রেজিস্ট্রেশন করলেই আপনার ওয়ালেটে সরাসরি ৳৫০ বোনাস যোগ হবে! কোনো দৈনিক লিমিট নেই, যত খুশি রেফার করুন।' 
+                      : 'Share your personal referral link with friends. For every registration under your link, get an instant ৳50 BDT commission in your wallet! No daily limits.'}
                   </p>
                 </div>
 
@@ -401,32 +427,34 @@ export default function WalletDashboard({
                 <div className="flex-1 max-w-lg w-full space-y-4">
                   {/* Share Link Box */}
                   <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
-                    <label className="block text-[11px] text-slate-300 font-extrabold text-left uppercase tracking-wider">আপনার রেফারেল লিঙ্ক</label>
+                    <label className="block text-[11px] text-slate-300 font-extrabold text-left uppercase tracking-wider">
+                      {isBn ? 'আপনার রেফারেল লিঙ্ক' : 'Your Personal Referral Link'}
+                    </label>
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
                         readOnly
-                        value={`${window.location.origin}/?ref=${user.username}`}
+                        value={`https://adsnetworkbd.com/?ref=${user.username}`}
                         className="flex-1 bg-black/30 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-indigo-200 focus:outline-hidden"
                       />
                       <button
                         onClick={() => {
-                          navigator.clipboard.writeText(`${window.location.origin}/?ref=${user.username}`);
+                          navigator.clipboard.writeText(`https://adsnetworkbd.com/?ref=${user.username}`);
                           setCopied(true);
                           setTimeout(() => setCopied(false), 2000);
                         }}
                         type="button"
-                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm"
+                        className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 cursor-pointer shadow-sm animate-pulse"
                       >
                         {copied ? (
                           <>
                             <Check className="w-3.5 h-3.5 text-emerald-300" />
-                            কপি হয়েছে!
+                            {isBn ? 'কপি হয়েছে!' : 'Copied!'}
                           </>
                         ) : (
                           <>
                             <Copy className="w-3.5 h-3.5" />
-                            লিঙ্ক কপি
+                            {isBn ? 'লিঙ্ক কপি' : 'Copy'}
                           </>
                         )}
                       </button>
@@ -440,8 +468,8 @@ export default function WalletDashboard({
                         <Users className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">মোট রেফারেল</p>
-                        <p className="text-lg font-black text-white font-mono mt-0.5">{user.referralCount || 0} জন</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{isBn ? 'মোট রেফারেল' : 'Total Referrals'}</p>
+                        <p className="text-lg font-black text-white font-mono mt-0.5">{user.referralCount || 0} {isBn ? 'জন' : 'Users'}</p>
                       </div>
                     </div>
 
@@ -450,8 +478,8 @@ export default function WalletDashboard({
                         <Gift className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">অর্জিত বোনাস</p>
-                        <p className="text-lg font-black text-emerald-400 font-mono mt-0.5">৳{user.referralEarnings || 0}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{isBn ? 'রেফারেল আয়' : 'Referral Commission'}</p>
+                        <p className="text-lg font-black text-white font-mono mt-0.5">৳{(user.referralEarnings || 0).toLocaleString(isBn ? 'bn-BD' : 'en-US')}</p>
                       </div>
                     </div>
                   </div>
@@ -461,189 +489,214 @@ export default function WalletDashboard({
               </div>
             </div>
 
-            {/* WITHDRAW & TRANSACTIONS SPLIT PANEL */}
+            {/* WITHDRAW CONTAINER & RECENT TRANSACTION HISTORY */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               
-              {/* Left Side: withdrawal Terminal */}
+              {/* Left Column: Withdrawal Form */}
               <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-100 shadow-xs">
-                <div className="flex items-center gap-2 pb-4 mb-4 border-b border-slate-50">
+                <div className="flex items-center gap-2 pb-4 mb-4 border-b">
                   <Smartphone className="w-5 h-5 text-[var(--brand-primary-start)]" />
-                  <h3 className="text-base font-extrabold text-slate-900">টাকা উত্তোলন টার্মিনাল</h3>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    {isBn ? 'পেমেন্ট উইথড্র ফর্ম (Cashout)' : 'Secure Wallet Payout Request'}
+                  </h3>
                 </div>
 
-                <form onSubmit={handleWithdraw} className="space-y-4">
-                  {/* Select MFS Payment Method */}
+                <form onSubmit={handleWithdraw} className="space-y-4 text-left">
+                  
+                  {/* Select MFS Operator */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-2">পেমেন্ট মাধ্যম সিলেক্ট করুন</label>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      {[
-                        { 
-                          id: 'bKash (বিকাশ)', 
-                          label: 'বিকাশ', 
-                          Logo: BKashLogo, 
-                          activeClass: 'border-[#E2136E] bg-pink-50/60 ring-2 ring-pink-200/80 text-[#E2136E]' 
-                        },
-                        { 
-                          id: 'Nagad (নগদ)', 
-                          label: 'নগদ', 
-                          Logo: NagadLogo, 
-                          activeClass: 'border-[#F7921E] bg-orange-50/60 ring-2 ring-orange-200/80 text-[#F7921E]' 
-                        },
-                        { 
-                          id: 'Rocket (রকেট)', 
-                          label: 'রকেট', 
-                          Logo: RocketLogo, 
-                          activeClass: 'border-[#8C3494] bg-purple-50/60 ring-2 ring-purple-200/80 text-[#8C3494]' 
-                        }
-                      ].map((item) => {
-                        const isSelected = paymentMethod === item.id;
+                    <label className="block text-xs font-bold text-slate-500 mb-1.5">{isBn ? 'উইথড্র মাধ্যম নির্বাচন করুন' : 'Select Mobile Wallet operator'}</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['bKash (বিকাশ)', 'Nagad (নগদ)', 'Rocket (রকেট)'].map((method) => {
+                        const cleanMethod = isBn ? method : method.split(' ')[0];
                         return (
                           <button
-                            key={item.id}
+                            key={method}
                             type="button"
-                            onClick={() => setPaymentMethod(item.id)}
-                            className={`p-2.5 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer relative ${
-                              isSelected
-                                ? item.activeClass
-                                : 'border-slate-200/80 bg-slate-50/80 hover:bg-white hover:border-slate-300 text-slate-600'
+                            onClick={() => setPaymentMethod(method)}
+                            className={`py-2.5 px-2 text-[10px] font-bold rounded-xl border flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
+                              paymentMethod === method
+                                ? 'border-[var(--brand-primary-start)] bg-blue-50 text-[var(--brand-primary-start)] font-black ring-2 ring-blue-100'
+                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
                             }`}
                           >
-                            <item.Logo className="w-9 h-9" showText={false} />
-                            <span className="text-[11px] font-extrabold tracking-tight">
-                              {item.label}
-                            </span>
+                            <PaymentLogoBadge method={method} className="w-4 h-4" />
+                            <span>{cleanMethod}</span>
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* Input Mobile Account Phone */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5">আপনার অ্যাকাউন্ট নম্বর (মোবাইল)</label>
+                  {/* Account Receiver No */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-500">
+                      {isBn ? `আপনার বিকাশ/নগদ/রকেট মোবাইল নম্বর (${paymentMethod.split(' ')[0]})` : `Your ${paymentMethod.split(' ')[0]} Recipient Number`}
+                    </label>
                     <input
-                      type="tel"
+                      type="text"
+                      required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="যেমন: 017xxxxxxxx"
-                      className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-100 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[var(--brand-primary-start)] focus:bg-white"
+                      placeholder={isBn ? "১১ ডিজিটের পেমেন্ট নম্বরটি দিন" : "e.g., 017XXXXXXXX"}
+                      className="w-full px-3.5 py-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-blue-600 focus:bg-white font-medium"
                     />
                   </div>
 
-                  {/* Input Amount to Withdraw */}
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1.5">উত্তোলনের পরিমাণ (৳)</label>
+                  {/* Cashout Amount */}
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-500">{isBn ? 'উইথড্র পরিমাণ (সর্বনিম্ন ৳১০০)' : 'Cashout Amount (Min ৳100 BDT)'}</label>
                     <input
                       type="number"
+                      required
+                      min="100"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      placeholder="উত্তোলনের পরিমাণ লিখুন (সর্বনিম্ন ৳১০০)"
-                      className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-100 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[var(--brand-primary-start)] focus:bg-white font-mono"
+                      placeholder={isBn ? "টাকার পরিমাণ লিখুন" : "e.g., 500"}
+                      className="w-full px-3.5 py-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-blue-600 focus:bg-white font-mono font-bold"
                     />
                   </div>
 
-                  {/* Limits and policy details */}
-                  <div className="p-3 bg-blue-50/50 border border-blue-100/30 rounded-xl text-[10px] text-slate-600 font-semibold space-y-1 text-left">
-                    <p>• সর্বনিম্ন উত্তোলনের সীমা ১০০ টাকা।</p>
-                    <p>• রিকোয়েস্ট সাবমিটের পর দ্রুত আপনার বিকাশ/নগদ নম্বরে ক্রেডিট করা হবে।</p>
+                  {/* Info notice about instant payout limits */}
+                  <div className="p-3 bg-blue-50 text-blue-900 rounded-2xl text-[11px] font-bold leading-normal flex items-start gap-2 border border-blue-100">
+                    <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                    <span>
+                      {isBn 
+                        ? 'উইথড্রাল নিয়ম: প্রতিদিন সকাল ৯:০০ টা থেকে রাত ৯:০০ টার মধ্যে যেকোনো উইথড্র রিকোয়েস্ট মাত্র ১০ থেকে ৩০ মিনিটের মধ্যে স্বয়ংক্রিয়ভাবে বিকাশ/নগদ নাম্বারে ট্রান্সফার করা হয়।' 
+                        : 'Payout schedule: Cashouts are automatically sent via bKash, Nagad or Rocket within 10 to 30 mins between 9:00 AM and 9:00 PM.'}
+                    </span>
                   </div>
 
-                  {/* Feedback warnings */}
-                  {errorMsg && (
-                    <div className="p-3.5 bg-red-50 text-red-900 border border-red-200 rounded-xl text-xs font-bold space-y-2 text-left">
-                      <p>⚠ {errorMsg}</p>
-                      {errorMsg.includes('আপডেট') && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const el = document.getElementById('packages');
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                          className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer inline-block"
-                        >
-                          প্যাকেজ আপগ্রেড করুন →
-                        </button>
-                      )}
-                    </div>
-                  )}
-
+                  {/* Success/Error Alerts */}
                   {successMsg && (
-                    <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-100 rounded-xl text-xs font-bold text-left">
+                    <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold">
                       ✓ {successMsg}
                     </div>
                   )}
+                  {errorMsg && (
+                    <div className="p-3 bg-red-50 text-red-800 border border-red-200 rounded-xl text-xs font-bold">
+                      ⚠ {errorMsg}
+                    </div>
+                  )}
 
-                  {/* Submit withdrawal Button */}
+                  {/* Submit withdrawal */}
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 text-center text-sm font-bold text-white bg-gradient-to-r from-[var(--brand-primary-start)] to-[var(--brand-primary-end)] hover:opacity-95 rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full py-4 bg-gradient-to-r from-blue-700 to-indigo-800 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? 'প্রসেসিং হচ্ছে...' : 'উইথড্র রিকোয়েস্ট পাঠান'}
-                    <ArrowRight className="w-4 h-4" />
+                    {isLoading ? (isBn ? 'রিকোয়েস্ট পাঠানো হচ্ছে...' : 'Processing Payout...') : (isBn ? 'উইথড্র রিকোয়েস্ট সাবমিট করুন' : 'Request Secure Withdrawal')}
                   </button>
 
                 </form>
               </div>
 
-              {/* Right Side: Ledger Transaction Logs */}
-              <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-100 shadow-xs">
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-50">
-                  <h3 className="text-base font-extrabold text-slate-900">সাম্প্রতিক ওয়ালেট বিবরণী</h3>
-                  <span className="text-xs font-bold text-slate-400 font-mono">TXNS COUNT: {userTx.length}</span>
+              {/* Right Column: User Payout History Log */}
+              <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-100 shadow-xs flex flex-col justify-between min-h-full">
+                <div>
+                  <div className="flex items-center justify-between pb-4 mb-4 border-b">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-[var(--brand-primary-start)]" />
+                      <h3 className="text-base font-extrabold text-slate-900">
+                        {isBn ? 'আপনার সাম্প্রতিক লেনদেন সমূহ' : 'Your Recent Transactions'}
+                      </h3>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 font-mono">
+                      {isBn ? `মোট লেনদেন: ${userTx.length}টি` : `Total: ${userTx.length} Records`}
+                    </span>
+                  </div>
+
+                  {/* Transactions list */}
+                  {userTx.length === 0 ? (
+                    <div className="py-12 text-center text-slate-400 space-y-3">
+                      <Clock className="w-12 h-12 text-slate-300 mx-auto" />
+                      <p className="text-xs font-bold">
+                        {isBn ? 'এখনো কোনো লেনদেন রেকর্ড পাওয়া যায়নি।' : 'No transaction records found yet.'}
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        {isBn ? 'ভিডিও দেখা শুরু করুন বা ডিপোজিট করে মেম্বারশিপ কিনুন।' : 'Start watching commercial ads or deposit to activate paid tiers.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                      {userTx.map((tx) => {
+                        const isReward = tx.type === 'video';
+                        const isBonus = tx.type === 'bonus';
+                        const isDeposit = tx.type === 'deposit';
+                        const isWithdraw = tx.type === 'withdrawal';
+
+                        let typeBadge = '';
+                        let colorBadge = '';
+                        if (isReward) {
+                          typeBadge = isBn ? 'ভিডিও রিওয়ার্ড' : 'Video Reward';
+                          colorBadge = 'bg-blue-50 text-blue-800 border-blue-100';
+                        } else if (isBonus) {
+                          typeBadge = isBn ? 'ডেইলি বোনাস' : 'Daily Bonus';
+                          colorBadge = 'bg-indigo-50 text-indigo-800 border-indigo-100';
+                        } else if (isDeposit) {
+                          typeBadge = isBn ? 'প্যাকেজ ডিপোজিট' : 'Plan Deposit';
+                          colorBadge = 'bg-purple-50 text-purple-800 border-purple-100';
+                        } else if (isWithdraw) {
+                          typeBadge = isBn ? 'ক্যাশআউট উইথড্র' : 'Wallet Withdrawal';
+                          colorBadge = 'bg-amber-50 text-amber-800 border-amber-100';
+                        }
+
+                        let statusLabel = '';
+                        let statusColor = '';
+                        if (tx.status === 'Credited') {
+                          statusLabel = isBn ? 'সম্পন্ন (Credited)' : 'Credited';
+                          statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                        } else if (tx.status === 'Verified') {
+                          statusLabel = isBn ? 'অনুমোদিত (Paid)' : 'Verified & Sent';
+                          statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                        } else if (tx.status === 'Pending') {
+                          statusLabel = isBn ? 'যাচাই চলছে (Pending)' : 'Pending Verification';
+                          statusColor = 'bg-amber-100 text-amber-800 border-amber-300';
+                        } else if (tx.status === 'Rejected') {
+                          statusLabel = isBn ? 'বাতিল (Rejected)' : 'Rejected';
+                          statusColor = 'bg-red-100 text-red-800 border-red-300';
+                        }
+
+                        return (
+                          <div 
+                            key={tx.id}
+                            className="p-3 bg-slate-50 hover:bg-slate-100/50 rounded-xl border border-slate-100 flex items-center justify-between gap-3 text-left transition-colors"
+                          >
+                            <div className="space-y-1 truncate">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border ${colorBadge}`}>
+                                  {typeBadge}
+                                </span>
+                                <span className={`px-2 py-0.2 rounded text-[9px] font-bold border ${statusColor}`}>
+                                  {statusLabel}
+                                </span>
+                              </div>
+                              <p className="text-[11px] font-bold text-slate-800 truncate">
+                                {isReward ? (tx.videoTitle || (isBn ? 'বাণিজ্যিক অ্যাড ভিডিও' : 'Commercial Ads View')) : isDeposit ? (isBn ? `প্যাকেজ অ্যাক্টিভেশন: ${tx.packageName || 'Paid'}` : `Membership: ${tx.packageName || 'Premium'}`) : (isBn ? `${tx.paymentMethod?.split(' ')[0]} উইথড্র পেমেন্ট (${tx.phone})` : `${tx.paymentMethod?.split(' ')[0]} Payout to ${tx.phone}`)}
+                              </p>
+                              <div className="flex items-center gap-1.5 text-[9.5px] text-slate-400 font-mono">
+                                <span>{tx.id}</span>
+                                <span>·</span>
+                                <span>{tx.completionTime}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right shrink-0">
+                              <span className={`text-sm font-black font-mono ${isWithdraw ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                {isWithdraw ? '-' : '+'}৳{tx.amount.toLocaleString(isBn ? 'bn-BD' : 'en-US')}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                {userTx.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400 text-sm font-semibold">
-                    কোনো লেনদেনের বিবরণ খুঁজে পাওয়া যায়নি।
-                  </div>
-                ) : (
-                  <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1">
-                    {userTx.map((tx) => (
-                      <div 
-                        key={tx.id}
-                        className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs"
-                      >
-                        {/* Left Info: Type/Action */}
-                        <div className="space-y-1">
-                          <p className="font-bold text-slate-900">
-                            {tx.type === 'video' && `🎬 ভিডিও রিওয়ার্ড: ${tx.videoTitle?.substring(0, 20)}...`}
-                            {tx.type === 'withdrawal' && `🏦 মোবাইল উত্তোলন: ${tx.paymentMethod?.split(' ')[0]}`}
-                            {tx.type === 'bonus' && '🎁 ডেইলি ওয়াচ বোনাস'}
-                          </p>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-semibold font-mono">
-                            <span>ID: {tx.id}</span>
-                            <span>·</span>
-                            <span>{tx.completionTime}</span>
-                          </div>
-                        </div>
-
-                        {/* Right Info: Amount & status tag */}
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          <span className={`font-mono font-black text-sm ${tx.type === 'withdrawal' ? 'text-red-600' : 'text-emerald-600'}`}>
-                            {tx.type === 'withdrawal' ? '-' : '+'}৳{tx.amount}
-                          </span>
-                          
-                          {/* Colored dynamic status badge */}
-                          <span className={`px-2 py-0.5 text-[9px] font-bold rounded-md ${
-                            tx.status === 'Credited' && 'bg-emerald-100 text-emerald-800'
-                          } ${
-                            tx.status === 'Verified' && 'bg-blue-100 text-blue-800'
-                          } ${
-                            tx.status === 'Pending' && 'bg-amber-100 text-amber-800'
-                          } ${
-                            tx.status === 'Rejected' && 'bg-red-100 text-red-800'
-                          }`}>
-                            {tx.status === 'Credited' && 'অ্যাকাউন্টে যুক্ত'}
-                            {tx.status === 'Verified' && 'অনুমোদিত'}
-                            {tx.status === 'Pending' && 'পর্যবেক্ষণাধীন'}
-                            {tx.status === 'Rejected' && 'বাতিল করা হয়েছে'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="pt-4 border-t border-slate-100 flex items-center gap-1.5 text-[10px] text-slate-400 font-bold justify-end font-sans">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span>{isBn ? 'সবগুলো আর্থিক লেনদেন বাংলাদেশ সরকারি প্রটোকলে ট্যাক্স-পেইড।' : 'All financial transactions strictly processed with paid taxes.'}</span>
+                </div>
               </div>
 
             </div>

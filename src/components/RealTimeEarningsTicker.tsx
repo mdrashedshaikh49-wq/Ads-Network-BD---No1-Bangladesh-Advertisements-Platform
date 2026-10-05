@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 import { BKashLogo, NagadLogo, RocketLogo } from './PaymentLogos';
+import { useLanguage } from '../context/LanguageContext';
 
 export interface EarningsTickerItem {
   id: string;
@@ -21,6 +22,7 @@ interface RealTimeEarningsTickerProps {
 export default function RealTimeEarningsTicker({ className = '' }: RealTimeEarningsTickerProps) {
   const [items, setItems] = useState<EarningsTickerItem[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const { isBn } = useLanguage();
 
   const fetchTickerData = async () => {
     try {
@@ -85,7 +87,7 @@ export default function RealTimeEarningsTicker({ className = '' }: RealTimeEarni
           </span>
           <div className="flex items-center gap-1.5 font-sans">
             <span className="text-[11px] sm:text-xs font-black tracking-tight text-white uppercase hidden xs:inline">
-              লাইভ আর্নিংস
+              {isBn ? 'লাইভ আর্নিংস' : 'LIVE EARNINGS'}
             </span>
             <span className="text-[10px] font-bold text-emerald-400 font-mono bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-700/50">
               LIVE
@@ -123,18 +125,18 @@ export default function RealTimeEarningsTicker({ className = '' }: RealTimeEarni
                   {isWithdrawal ? (
                     <span className="inline-flex items-center gap-1 text-amber-400 font-bold">
                       <TrendingUp className="w-3 h-3 text-amber-400" />
-                      উইথড্র করেছেন
+                      {isBn ? 'উইথড্র করেছেন' : 'Withdrew'}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-emerald-400 font-bold">
                       <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                      ইনকাম করেছেন
+                      {isBn ? 'ইনকাম করেছেন' : 'Earned'}
                     </span>
                   )}
 
                   {/* Amount Badge */}
                   <span className="font-mono font-black text-white bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 text-[11px]">
-                    ৳{item.amount.toLocaleString('bn-BD')}
+                    ৳{item.amount.toLocaleString(isBn ? 'bn-BD' : 'en-US')}
                   </span>
 
                   {/* Context Brand Tag */}
@@ -152,7 +154,25 @@ export default function RealTimeEarningsTicker({ className = '' }: RealTimeEarni
 
                   {/* Timestamp */}
                   <span className="text-[10px] text-slate-500 font-mono">
-                    • {item.timeAgo}
+                    • {(() => {
+                      const timeStr = item.timeAgo || '';
+                      if (isBn) return timeStr;
+                      return timeStr
+                        .replace('মিনিট আগে', 'm ago')
+                        .replace('ঘণ্টা আগে', 'h ago')
+                        .replace('দিন আগে', 'd ago')
+                        .replace('এইমাত্র', 'just now')
+                        .replace('১', '1')
+                        .replace('২', '2')
+                        .replace('৩', '3')
+                        .replace('৪', '4')
+                        .replace('৫', '5')
+                        .replace('৬', '6')
+                        .replace('৭', '7')
+                        .replace('৮', '8')
+                        .replace('৯', '9')
+                        .replace('০', '0');
+                    })()}
                   </span>
                 </div>
               );
@@ -163,7 +183,7 @@ export default function RealTimeEarningsTicker({ className = '' }: RealTimeEarni
         {/* Right Trust Mini Pill */}
         <div className="z-20 shrink-0 pl-3 sm:pl-4 hidden md:flex items-center gap-1.5 text-[11px] text-slate-400 bg-gradient-to-l from-slate-950 via-slate-950 to-transparent py-1 font-mono">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>১০০% ভেরিফাইড</span>
+          <span>{isBn ? '১০০% ভেরিফাইড' : '100% Verified'}</span>
         </div>
 
       </div>

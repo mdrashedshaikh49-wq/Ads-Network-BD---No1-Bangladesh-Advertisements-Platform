@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Clock, Award, ShieldAlert, Sparkles, CheckCircle, RefreshCw, Lock, ArrowRight, Smartphone, Eye, Video as VideoIcon, UserCheck } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export const SOCIAL_LOGOS = {
   facebook: "https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg",
@@ -100,6 +101,7 @@ export function playCashSound() {
 
 export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser, activeTab, setActiveTab }: WatchSectionProps) {
   const [inlinePlayingVideoId, setInlinePlayingVideoId] = useState<string | null>(null);
+  const { isBn } = useLanguage();
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [activeSession, setActiveSession] = useState<any>(null);
   const [isWatching, setIsWatching] = useState(false);
@@ -330,13 +332,17 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-black uppercase tracking-wider mb-2">
             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-            বাণিজ্যিক টিভি ও ডিজিটাল বিজ্ঞাপন গ্যালারি (Commercial Ads Network)
+            {isBn ? 'বাণিজ্যিক টিভি ও ডিজিটাল বিজ্ঞাপন গ্যালারি (Commercial Ads Network)' : 'Commercial TV & Digital Ad Gallery'}
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mt-1 sm:mt-1.5 text-wrap">
-            স্পন্সরড বাণিজ্যিক বিজ্ঞাপন দেখুন ও রিওয়ার্ড নিন
+            {isBn ? 'স্পন্সরড বাণিজ্যিক বিজ্ঞাপন দেখুন ও রিওয়ার্ড নিন' : 'Watch Sponsored Commercial Ads & Get Rewards'}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-            অনুমোদিত কর্পোরেট ব্র্যান্ডের ৩০ সেকেন্ড ইন-স্ট্রিম ভিডিও বিজ্ঞাপন দেখুন, নিজস্ব সোশ্যাল অ্যাকাউন্টে শেয়ার করুন এবং প্রতি ভিউয়ে নিশ্চিত <strong className="text-emerald-700 font-mono font-black">৳১০০</strong> ওয়ালেট ব্যালেন্স অর্জন করুন।
+            {isBn ? (
+              <>অনুমোদিত কর্পোরেট ব্র্যান্ডের ৩০ সেকেন্ড ইন-স্ট্রিম ভিডিও বিজ্ঞাপন দেখুন, নিজস্ব সোশ্যাল অ্যাকাউন্টে শেয়ার করুন এবং প্রতি ভিউয়ে নিশ্চিত <strong className="text-emerald-700 font-mono font-black">৳১০০</strong> ওয়ালেট ব্যালেন্স অর্জন করুন।</>
+            ) : (
+              <>Watch 30-second in-stream video advertisements from approved corporate brands, share on your social media, and get guaranteed <strong className="text-emerald-700 font-mono font-black">৳100</strong> wallet rewards.</>
+            )}
           </p>
         </div>
 
@@ -352,7 +358,7 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
               }`}
             >
               <VideoIcon className="w-3.5 h-3.5" />
-              হোম পাবলিক প্রিভিউ ({publicVideos.length})
+              {isBn ? `হোম পাবলিক প্রিভিউ (${publicVideos.length})` : `Home Public Preview (${publicVideos.length})`}
             </button>
             <button
               onClick={() => {
@@ -368,7 +374,7 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-              ★ পেইড প্ল্যান এক্সক্লুসিভ টাস্ক ({paidVideos.length}টি ভিডিও)
+              {isBn ? `★ পেইড প্ল্যান এক্সক্লুসিভ টাস্ক (${paidVideos.length}টি ভিডিও)` : `★ Paid Plan Exclusive Tasks (${paidVideos.length} Ads)`}
               {!hasPaidPackage && <Lock className="w-3 h-3 text-amber-800" />}
             </button>
           </div>
@@ -376,11 +382,11 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
           <div className="text-right text-[11px] font-bold text-slate-500 hidden md:block">
             {effectiveTab === 'paid' ? (
               <span className="text-amber-800 bg-amber-100/70 px-3 py-1 rounded-full border border-amber-300">
-                🔒 পেইড মেম্বারশিপ টাস্ক (হোম পেজে অপ্রদর্শিত)
+                {isBn ? '🔒 পেইড মেম্বারশিপ টাস্ক (হোম পেজে অপ্রদর্শিত)' : '🔒 Paid Membership Tasks (Hidden from Home)'}
               </span>
             ) : (
               <span className="text-blue-700 bg-blue-100/70 px-3 py-1 rounded-full border border-blue-200">
-                🌐 সাধারণ প্রিভিউ ভিডিও গ্যালারি
+                {isBn ? '🌐 সাধারণ প্রিভিউ ভিডিও গ্যালারি' : '🌐 Public Video Gallery'}
               </span>
             )}
           </div>
@@ -394,9 +400,13 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
                 <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div>
-                <p className="text-sm sm:text-base font-black">ভিডিও দেখতে প্রথমে প্যাকেজ কিনতে হবে!</p>
+                <p className="text-sm sm:text-base font-black">
+                  {isBn ? 'ভিডিও দেখতে প্রথমে প্যাকেজ কিনতে হবে!' : 'You must activate a package to view ads!'}
+                </p>
                 <p className="text-xs text-amber-800 mt-0.5 font-medium leading-relaxed">
-                  প্যাকেজ না কিনলে কেউ ভিডিও দেখে আয় করতে পারবে না। প্রথমে বিকাশ, নগদ বা রকেটে ডিপোজিট করে প্যাকেজ সক্রিয় করুন।
+                  {isBn 
+                    ? 'প্যাকেজ না কিনলে কেউ ভিডিও দেখে আয় করতে পারবে না। প্রথমে বিকাশ, নগদ বা রকেটে ডিপোজিট করে প্যাকেজ সক্রিয় করুন।' 
+                    : 'Watching ads and earning requires an active membership plan. Deposit via bKash, Nagad or Rocket now.'}
                 </p>
               </div>
             </div>
@@ -407,7 +417,7 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
               }}
               className="w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 text-xs font-black text-white bg-amber-600 hover:bg-amber-700 rounded-xl sm:rounded-2xl shadow-md transition-all shrink-0 cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              প্যাকেজ কিনুন (Deposit Now)
+              {isBn ? 'প্যাকেজ কিনুন (Deposit Now)' : 'Buy Package (Deposit Now)'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -420,13 +430,15 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
               <Lock className="w-8 h-8 sm:w-10 sm:h-10" />
             </div>
             <span className="text-xs font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/20 font-mono">
-              ★ পেইড প্ল্যান মেম্বারশিপ এক্সক্লুসিভ টাস্ক
+              {isBn ? '★ পেইড প্ল্যান মেম্বারশিপ এক্সক্লুসিভ টাস্ক' : '★ PAID PLAN EXCLUSIVE MEMBERSHIP TASKS'}
             </span>
             <h3 className="text-xl sm:text-3xl font-black mt-3">
-              ১৩টি পেইড প্ল্যান স্পেশাল ভিডিও বিজ্ঞাপন
+              {isBn ? '১৩টি পেইড প্ল্যান স্পেশাল ভিডিও বিজ্ঞাপন' : '13 Premium Paid Plan Video Advertisements'}
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 mt-2.5 max-w-xl mx-auto leading-relaxed">
-              এই ভিডিওগুলো সাধারণ ভিজিটর বা হোম পেজে প্রদর্শন করা হয় না। শুধুমাত্র পেইড মেম্বারশিপ প্ল্যান সক্রিয়কারী ব্যবহারকারীরা এই ১৩টি বিজ্ঞাপন দেখে প্রতিদিন নিশ্চিত ৳১০০ করে আয় করতে পারবেন।
+              {isBn 
+                ? 'এই ভিডিওগুলো সাধারণ ভিজিটর বা হোম পেজে প্রদর্শন করা হয় না। শুধুমাত্র পেইড মেম্বারশিপ প্ল্যান সক্রিয়কারী ব্যবহারকারীরা এই ১৩টি বিজ্ঞাপন দেখে প্রতিদিন নিশ্চিত ৳১০০ করে আয় করতে পারবেন।' 
+                : 'These videos are kept exclusive and are hidden from the public homepage. Only members with active paid plans can watch these 13 premium ads to earn ৳100 per view.'}
             </p>
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
               <button
@@ -438,13 +450,13 @@ export default function WatchSection({ user, videos, onOpenLogin, onRefreshUser,
                 className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-4 h-4 fill-slate-950" />
-                প্যাকেজ ডিপোজিট করে ১৩টি ভিডিও আনলক করুন
+                {isBn ? 'প্যাকেজ ডিপোজিট করে ১৩টি ভিডিও আনলক করুন' : 'Deposit and Unlock 13 Premium Ads'}
               </button>
               <button
                 onClick={() => setGalleryTab('public')}
                 className="w-full sm:w-auto px-5 py-3.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
-                পাবলিক ডেমো ভিডিও দেখুন
+                {isBn ? 'পাবলিক ডেমো ভিডিও দেখুন' : 'Watch Public Demo Ads'}
               </button>
             </div>
           </div>

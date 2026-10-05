@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Play, CheckCircle, Wallet, Users, Video, Gift, Award } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HeroProps {
   onStartWatchingClick: () => void;
@@ -14,6 +15,8 @@ interface HeroProps {
 
 export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }: HeroProps) {
   const [isPlayingDashboardVideo, setIsPlayingDashboardVideo] = useState(false);
+  const { isBn } = useLanguage();
+
   return (
     <section id="home" className="relative pt-8 pb-16 lg:pt-16 lg:pb-24 overflow-hidden bg-slate-50/50">
       {/* Visual Background Glows */}
@@ -30,28 +33,38 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
               <span>COMMERCIAL AD EXCHANGE & TVC MONETIZATION PLATFORM</span>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.25] text-wrap">
-              বাংলাদেশের ১০০০+ শীর্ষ <br />
-              <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 bg-clip-text text-transparent">
-                কর্পোরেট কমার্শিয়াল ভিডিও অ্যাড দেখুন,
-              </span> <br />
-              বিজ্ঞাপন দেখুন ও নিজস্ব <br />
-              <span className="text-blue-800 font-extrabold">Facebook, Instagram, YouTube, TikTok</span> এ Share করুন। <br />
-              <span className="text-emerald-700 font-black">সহজেই Reward Income করুন।</span>
-            </h1>
-
-
+            {isBn ? (
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.25] text-wrap">
+                বাংলাদেশের ১০০০+ শীর্ষ <br />
+                <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 bg-clip-text text-transparent">
+                  কর্পোরেট কমার্শিয়াল ভিডিও অ্যাড দেখুন,
+                </span> <br />
+                বিজ্ঞাপন দেখুন ও নিজস্ব <br />
+                <span className="text-blue-800 font-extrabold">Facebook, Instagram, YouTube, TikTok</span> এ Share করুন। <br />
+                <span className="text-emerald-700 font-black">সহজেই Reward Income করুন।</span>
+              </h1>
+            ) : (
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.25] text-wrap">
+                Watch 1000+ Leading <br />
+                <span className="bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 bg-clip-text text-transparent">
+                  Corporate Commercial Video Ads,
+                </span> <br />
+                Watch and Share on your <br />
+                <span className="text-blue-800 font-extrabold">Facebook, Instagram, YouTube, TikTok</span>. <br />
+                <span className="text-emerald-700 font-black">Earn Guaranteed Rewards Instantly.</span>
+              </h1>
+            )}
 
             {/* Commercial Ad Format Pills */}
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold">
               <span className="px-3 py-1 bg-white border border-slate-200 text-slate-800 rounded-lg shadow-2xs">
-                📺 30s In-Stream TVC Ads
+                📺 {isBn ? "৩০ সেকেন্ড ইন-স্ট্রিম ভিডিও" : "30s In-Stream TVC Ads"}
               </span>
               <span className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg shadow-2xs">
-                ৳ 100% Guaranteed Viewer Payout
+                ৳ {isBn ? "১০০% গ্যারান্টিড ভিউয়ার পেমেন্ট" : "100% Guaranteed Viewer Payout"}
               </span>
               <span className="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg shadow-2xs">
-                🚀 Multi-Channel Social Boost
+                🚀 {isBn ? "সোশ্যাল মিডিয়া বুস্ট সুবিধা" : "Multi-Channel Social Boost"}
               </span>
             </div>
 
@@ -61,13 +74,13 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                 className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-800 hover:opacity-95 text-white font-extrabold rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer group"
               >
                 <Play className="w-5 h-5 fill-white group-hover:scale-110 transition-transform" />
-                বাণিজ্যিক বিজ্ঞাপন দেখা শুরু করুন
+                {isBn ? "বাণিজ্যিক বিজ্ঞাপন দেখা শুরু করুন" : "Start Watching Commercial Ads"}
               </button>
               <button
                 onClick={onHowItWorksClick}
                 className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-300 text-slate-800 hover:bg-slate-50 font-extrabold rounded-2xl shadow-xs transition-all flex items-center justify-center cursor-pointer"
               >
-                বিজ্ঞাপন ও আয়ের নিয়মাবলী
+                {isBn ? "বিজ্ঞাপন ও আয়ের নিয়মাবলী" : "Rules & Earning Guidelines"}
               </button>
             </div>
 
@@ -75,15 +88,15 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 text-xs font-bold text-slate-600">
               <div className="flex items-center gap-1.5">
                 <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>অনুমোদিত বাণিজ্যিক ক্যাম্পেইন</span>
+                <span>{isBn ? "অনুমোদিত বাণিজ্যিক ক্যাম্পেইন" : "Approved Commercial Campaigns"}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>বিকাশ/নগদ ইনস্ট্যান্ট উইথড্র</span>
+                <span>{isBn ? "বিকাশ/নগদ ইনস্ট্যান্ট উইথড্র" : "bKash/Nagad Instant Withdrawal"}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>১০০% নিরাপদ ও সুরক্ষিত</span>
+                <span>{isBn ? "১০০% নিরাপদ ও সুরক্ষিত" : "100% Safe & Secure"}</span>
               </div>
             </div>
           </div>
@@ -101,7 +114,7 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                   <div className="w-3 h-3 rounded-full bg-amber-400" />
                   <div className="w-3 h-3 rounded-full bg-emerald-400" />
                 </div>
-                <span className="text-xs font-bold text-slate-400 font-mono">LIVE REAL DASHBOARD</span>
+                <span className="text-xs font-bold text-slate-400 font-mono">{isBn ? "চলতি লাইভ ড্যাশবোর্ড" : "LIVE REAL DASHBOARD"}</span>
               </div>
 
               {/* Video Player Preview / Live YouTube Video */}
@@ -109,7 +122,7 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                 {isPlayingDashboardVideo ? (
                   <iframe
                     src="https://www.youtube.com/embed/L00Mjjf48jI?autoplay=1&rel=0&modestbranding=1"
-                    title="টাকা হাতে থাকলেই কি খরচ হয়ে যায়? FDR খুলে ফেলুন বিকাশ অ্যাপে!"
+                    title="bKash FDR Video Ad"
                     className="w-full h-full border-0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
@@ -121,7 +134,7 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                   >
                     <img 
                       src="https://img.youtube.com/vi/L00Mjjf48jI/hqdefault.jpg" 
-                      alt="টাকা হাতে থাকলেই কি খরচ হয়ে যায়? FDR খুলে ফেলুন বিকাশ অ্যাপে!" 
+                      alt="bKash FDR TVC" 
                       className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                     />
@@ -129,7 +142,7 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                       <div className="flex justify-between items-start">
                         <span className="px-2.5 py-1 text-[10px] font-black bg-pink-600 text-white rounded-full shadow-md flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                          বিকাশ অফিসিয়াল বিজ্ঞাপন (৳১০০)
+                          {isBn ? "বিকাশ অফিসিয়াল বিজ্ঞাপন (৳১০০)" : "bKash Official Ads (৳100)"}
                         </span>
                         <span className="text-[10px] font-bold text-white/95 bg-black/60 px-2 py-0.5 rounded-md font-mono backdrop-blur-xs">
                           00:30
@@ -145,8 +158,8 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                           <div className="bg-pink-500 h-1.5 rounded-full" style={{ width: '70%' }} />
                         </div>
                         <div className="flex justify-between items-center text-[9px] text-white/95 font-bold">
-                          <span className="line-clamp-1 max-w-[200px]">bKash FDR স্পন্সরড ভিডিও</span>
-                          <span className="text-pink-300">প্লে করতে ক্লিক করুন ▶</span>
+                          <span className="line-clamp-1 max-w-[200px]">{isBn ? "বিকাশ FDR স্পন্সরড ভিডিও" : "bKash FDR Sponsored TVC"}</span>
+                          <span className="text-pink-300">{isBn ? "প্লে করতে ক্লিক করুন ▶" : "Click to Play ▶"}</span>
                         </div>
                       </div>
                     </div>
@@ -159,21 +172,21 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
                 {/* Stats Widget 1 */}
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="text-xs font-bold text-slate-500">চলতি ব্যালেন্স</span>
+                    <span className="text-xs font-bold text-slate-500">{isBn ? "চলতি ব্যালেন্স" : "Current Balance"}</span>
                     <Wallet className="w-4 h-4 text-[var(--brand-primary-start)]" />
                   </div>
-                  <span className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">৳১,২৫০.০০</span>
-                  <span className="text-[10px] text-emerald-600 font-bold mt-1">✓ উইথড্র করার যোগ্য</span>
+                  <span className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">{isBn ? "৳১,২৫০.০০" : "৳1,250.00"}</span>
+                  <span className="text-[10px] text-emerald-600 font-bold mt-1">✓ {isBn ? "উইথড্র করার যোগ্য" : "Withdraw Eligible"}</span>
                 </div>
 
                 {/* Stats Widget 2 */}
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col">
                   <div className="flex justify-between items-start mb-1">
-                    <span className="text-xs font-bold text-slate-500">আজকের আয়</span>
+                    <span className="text-xs font-bold text-slate-500">{isBn ? "আজকের আয়" : "Today's Earnings"}</span>
                     <Gift className="w-4 h-4 text-emerald-500" />
                   </div>
-                  <span className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">৳৮৫.০০</span>
-                  <span className="text-[10px] text-blue-600 font-bold mt-1">৮/১০টি সম্পন্ন</span>
+                  <span className="text-xl font-extrabold text-slate-900 font-mono tracking-tight">{isBn ? "৳৮৫.০০" : "৳85.00"}</span>
+                  <span className="text-[10px] text-blue-600 font-bold mt-1">{isBn ? "৮/১০টি সম্পন্ন" : "8/10 Completed"}</span>
                 </div>
               </div>
 
@@ -181,9 +194,9 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
               <div className="mt-4 flex items-center justify-between p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                 <div className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <div>
-                    <p className="text-xs font-black text-emerald-800">ডেইলি ওয়াচ বোনাস</p>
-                    <p className="text-[10px] text-emerald-600 font-semibold">আর মাত্র ২টি ভিডিও টাস্ক বাকি</p>
+                  <div className="text-left">
+                    <p className="text-xs font-black text-emerald-800">{isBn ? "ডেইলি ওয়াচ বোনাস" : "Daily Watch Bonus"}</p>
+                    <p className="text-[10px] text-emerald-600 font-semibold">{isBn ? "আর মাত্র ২টি ভিডিও টাস্ক বাকি" : "Only 2 more video tasks remaining"}</p>
                   </div>
                 </div>
                 <span className="text-xs font-bold bg-emerald-600 text-white px-2 py-0.5 rounded-md">৳২০</span>
@@ -202,11 +215,11 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
             {/* Stat Card 1 */}
             <div className="flex flex-col items-center text-center px-4">
               <span className="text-3xl md:text-4xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {(stats.registeredUsers || 25000).toLocaleString('bn-BD')}+
+                {isBn ? `${(stats.registeredUsers || 25000).toLocaleString('bn-BD')}+` : `${(stats.registeredUsers || 25000).toLocaleString()}+`}
               </span>
               <span className="text-xs md:text-sm font-semibold text-slate-500 mt-1.5 flex items-center gap-1">
                 <Users className="w-4 h-4 text-blue-500 shrink-0" />
-                নিবন্ধিত ব্যবহারকারী
+                {isBn ? "নিবন্ধিত ব্যবহারকারী" : "Registered Users"}
               </span>
             </div>
 
@@ -217,7 +230,7 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
               </span>
               <span className="text-xs md:text-sm font-semibold text-slate-500 mt-1.5 flex items-center gap-1">
                 <Video className="w-4 h-4 text-purple-500 shrink-0" />
-                মোট দেখা ভিডিও
+                {isBn ? "মোট দেখা ভিডিও" : "Total Videos Watched"}
               </span>
             </div>
 
@@ -228,26 +241,24 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
               </span>
               <span className="text-xs md:text-sm font-semibold text-slate-500 mt-1.5 flex items-center gap-1">
                 <Wallet className="w-4 h-4 text-emerald-500 shrink-0" />
-                প্রদত্ত পুরস্কার (Taka)
+                {isBn ? "প্রদত্ত পুরস্কার (Taka)" : "Rewards Distributed (BDT)"}
               </span>
             </div>
 
             {/* Stat Card 4 */}
             <div className="flex flex-col items-center text-center px-4">
               <span className="text-3xl md:text-4xl font-extrabold text-slate-900 font-mono tracking-tight">
-                {(stats.activeTasks || 500).toLocaleString('bn-BD')}+
+                {isBn ? `${(stats.activeTasks || 500).toLocaleString('bn-BD')}+` : `${(stats.activeTasks || 500).toLocaleString()}+`}
               </span>
               <span className="text-xs md:text-sm font-semibold text-slate-500 mt-1.5 flex items-center gap-1">
                 <Award className="w-4 h-4 text-amber-500 shrink-0" />
-                সক্রিয় ভিডিও টাস্ক
+                {isBn ? "সক্রিয় ভিডিও টাস্ক" : "Active Video Tasks"}
               </span>
             </div>
 
           </div>
         </div>
       </div>
-
-
 
     </section>
   );
