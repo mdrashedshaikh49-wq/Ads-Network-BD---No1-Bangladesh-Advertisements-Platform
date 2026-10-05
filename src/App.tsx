@@ -7,7 +7,6 @@ import PackagesSection from './components/PackagesSection';
 import WalletDashboard from './components/WalletDashboard';
 import AdvertiserSection from './components/AdvertiserSection';
 import PaymentProofGallery from './components/PaymentProofGallery';
-import TrustAndLegalSection from './components/TrustAndLegalSection';
 import FaqsAndFooter from './components/FaqsAndFooter';
 import AdminPanel from './components/AdminPanel';
 import RealTimeEarningsTicker from './components/RealTimeEarningsTicker';
@@ -608,6 +607,9 @@ export default function App() {
           stats={stats}
         />
 
+        {/* OFFICIAL COMMERCIAL SPONSORS & MEDIA PARTNERS */}
+        <SponsorLogos />
+
         {/* 24-HOUR ROLLING DAILY LIMIT & EARNING CAPACITY TRACKER (COMMERCIAL HUD) */}
         {user && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-8 relative z-20">
@@ -759,12 +761,6 @@ export default function App() {
             setActiveTab('watch-earn');
           }}
         />
-
-        {/* OFFICIAL COMMERCIAL SPONSORS & MEDIA PARTNERS */}
-        <SponsorLogos />
-
-        {/* GOVERNMENT REGISTRATIONS, LEGAL CREDENTIALS & HOTLINE BLOCK */}
-        <TrustAndLegalSection />
 
         {/* FAQS, WHY CHOOSE US, Live ACTIVITIES & BENGALI FOOTER BLOCK */}
         <FaqsAndFooter

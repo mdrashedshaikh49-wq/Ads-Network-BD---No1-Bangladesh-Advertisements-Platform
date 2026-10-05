@@ -40,59 +40,9 @@ export default function FaqsAndFooter({
     setOpenFaq(openFaq === id ? null : id);
   };
 
-  const steps = [
-    {
-      no: '১',
-      title: 'ফ্রি অ্যাকাউন্ট তৈরি করুন',
-      desc: 'মাত্র কয়েক সেকেন্ডে আপনার নাম ও মোবাইল নম্বর দিয়ে সম্পূর্ণ ফ্রি রেজিস্ট্রেশন সম্পন্ন করুন।'
-    },
-    {
-      no: '২',
-      title: 'পছন্দের ভিডিও বাছাই করুন',
-      desc: 'উপলভ্য ভিডিও গ্যালারি থেকে যেকোনো একটি আকর্ষণীয় রিওয়ার্ড ভিডিও সিলেক্ট করুন।'
-    },
-    {
-      no: '৩',
-      title: 'ভিডিও ওয়াচ সম্পন্ন করুন',
-      desc: 'ভিডিও প্লেয়ারে গিয়ে কাউন্টডাউন শেষ হওয়া পর্যন্ত মনোযোগ দিয়ে সম্পূর্ণ ভিডিওটি দেখুন।'
-    },
-    {
-      no: '৪',
-      title: 'পুরস্কার আপনার ওয়ালেটে নিন',
-      desc: 'টাইমার শেষ হবার সাথে সাথে রিওয়ার্ড দাবি করুন এবং আপনার বিকাশ বা নগদে টাকা উইথড্র করুন।'
-    }
-  ];
-
   return (
     <div className="space-y-0">
       
-      {/* HOW IT WORKS SECTION */}
-      <section id="how-it-works" className="py-16 bg-slate-50 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-sm font-bold text-[var(--brand-primary-start)] uppercase tracking-wider">নির্দেশিকা</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-1">কিভাবে কাজ শুরু করবেন?</h2>
-            <p className="text-sm text-slate-500 mt-2">মাত্র ৪টি সহজ ধাপ অনুসরণ করে আজই আপনার বাড়তি আয় নিশ্চিত করুন।</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {steps.map((step, idx) => (
-              <div 
-                key={idx}
-                className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs relative flex flex-col items-start text-left"
-              >
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-[var(--brand-primary-start)] text-lg font-black flex items-center justify-center mb-4 border border-blue-100">
-                  {step.no}
-                </div>
-                <h3 className="text-sm font-black text-slate-900 leading-snug">{step.title}</h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
 
       {/* WHY CHOOSE US TRUST SECTION */}
       <section className="py-16 bg-white">

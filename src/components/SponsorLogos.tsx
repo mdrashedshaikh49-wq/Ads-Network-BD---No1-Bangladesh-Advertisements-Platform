@@ -16,55 +16,61 @@ export default function SponsorLogos() {
       id: 'pran-rfl',
       name: 'PRAN-RFL Group',
       bnName: 'প্রাণ-আরএফএল গ্রুপ',
-      logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzNg1Hyx9ZOmfkJzlfkm0xT3TUKWkVah_FdYDrq3Q8wg&s=10'
+      logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJfC2p7GySdCQjjR_JrjnZvTpuVTyLHogN1Lfu2u0Ayw&s=10'
     },
     {
       id: 'unilever',
       name: 'Unilever Bangladesh',
       bnName: 'ইউনিলিভার বাংলাদেশ',
-      logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAoqqzQ_YZ6Xjj4nYet-F4FLTg_UTC9j8jv1jaIIXIpHpjCA9Vbxt-vbk&s'
+      logoUrl: 'https://images.seeklogo.com/logo-png/14/1/unilever-logo-png_seeklogo-145123.png'
+    },
+    {
+      id: 'bashundhara',
+      name: 'Bashundhara Group',
+      bnName: 'বসুন্ধরা গ্রুপ',
+      logoUrl: 'https://images.seeklogo.com/logo-png/43/1/bashundhara-group-logo-png_seeklogo-433144.png'
+    },
+    {
+      id: 'aci',
+      name: 'ACI Group',
+      bnName: 'এসিআই লিমিটেড',
+      logoUrl: 'https://vectorseek.com/wp-content/uploads/2023/07/Aci-Group-Logo-Vector.svg-.png'
     },
     {
       id: 'square',
-      name: 'Square Pharmaceuticals',
-      bnName: 'স্কয়ার ফার্মাসিউটিক্যালস',
-      logoUrl: 'https://images.seeklogo.com/logo-png/37/1/square-pharma-logo-png_seeklogo-370216.png'
+      name: 'Square Group',
+      bnName: 'স্কয়ার গ্রুপ',
+      logoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Seal_of_Square_Group.svg/1280px-Seal_of_Square_Group.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail'
     },
     {
-      id: 'brac-bank',
-      name: 'BRAC Bank Limited',
-      bnName: 'ব্র্যাক ব্যাংক লিমিটেড',
-      logoUrl: 'https://images.seeklogo.com/logo-png/26/2/brac-bank-logo-png_seeklogo-260716.png'
+      id: 'walton',
+      name: 'Walton BD',
+      bnName: 'ওয়ালটন বিডি',
+      logoUrl: 'https://images.seeklogo.com/logo-png/25/2/walton-logo-png_seeklogo-251022.png'
     },
     {
-      id: 'robi',
-      name: 'Robi Axiata',
-      bnName: 'রবি আজিয়াটা',
-      logoUrl: 'https://images.seeklogo.com/logo-png/27/1/robi-logo-png_seeklogo-271552.png'
-    },
-    {
-      id: 'renata',
-      name: 'Renata Limited',
-      bnName: 'রেনাটা লিমিটেড',
-      logoUrl: 'https://renata-ltd.com/assets/logoicon-blue-BAKnJa16.png'
-    },
-    {
-      id: 'beximco',
-      name: 'Beximco Pharma',
-      bnName: 'বেক্সিমকো ফার্মা',
-      logoUrl: 'https://medex.com.bd/storage/images/company_logos/u9SEyBHO8Wo45VJaNBaTH2RC6izRy7.png'
-    },
-    {
-      id: 'grameenphone',
-      name: 'Grameenphone',
-      bnName: 'গ্রামীণফোন',
-      logoUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8xpsNNPRf6qVogdAOr25rB10Q5zDH7yD6piyXPBglO5532tvzSnnR1aY&s=10'
+      id: 'akij',
+      name: 'Akij Group',
+      bnName: 'আকিজ গ্রুপ',
+      logoUrl: 'https://thumb.wikimedia.org/wikipedia/en/thumb/a/a7/Akij_Group_logo.svg/960px-Akij_Group_logo.svg.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail'
     },
     {
       id: 'meghna',
       name: 'Meghna Group of Industries',
       bnName: 'মেঘনা গ্রুপ অফ ইন্ডাস্ট্রিজ',
       logoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Logo_of_Meghna_Group_Of_Industries.svg/1280px-Logo_of_Meghna_Group_Of_Industries.svg.png?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=thumbnail'
+    },
+    {
+      id: 'grameenphone',
+      name: 'Grameenphone',
+      bnName: 'গ্রামীণফোন',
+      logoUrl: 'https://images.seeklogo.com/logo-png/24/1/grameenphone-logo-png_seeklogo-249793.png'
+    },
+    {
+      id: 'bkash',
+      name: 'bKash Limited',
+      bnName: 'বিকাশ লিমিটেড',
+      logoUrl: 'https://images.seeklogo.com/logo-png/27/1/bkash-logo-png_seeklogo-273684.png'
     }
   ];
 
@@ -93,7 +99,7 @@ export default function SponsorLogos() {
         </div>
 
         {/* Brand Logos Grid with high quality hover styling and fallbacks */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-9 gap-4 items-stretch justify-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-4 items-stretch justify-center">
           {sponsors.map((sponsor) => {
             const hasError = logoErrors[sponsor.id];
             return (

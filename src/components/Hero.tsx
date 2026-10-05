@@ -247,50 +247,7 @@ export default function Hero({ onStartWatchingClick, onHowItWorksClick, stats }:
         </div>
       </div>
 
-      {/* COMMERCIAL ENTERPRISE PARTNER & AD NETWORK STRIP */}
-      <div className="bg-slate-900 text-white py-6 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-wider text-slate-300 font-mono">
-                অফিসিয়াল বাণিজ্যিক স্পন্সর ও মিডিয়া পার্টনার্স:
-              </span>
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-blue-400 font-mono font-black">Grameenphone</span>
-                <span className="text-[10px] text-slate-400">gpfi 4G</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-orange-400 font-mono font-black">Banglalink</span>
-                <span className="text-[10px] text-slate-400">Digital</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-red-400 font-mono font-black">Coca-Cola</span>
-                <span className="text-[10px] text-slate-400">BD</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-blue-300 font-mono font-black">Unilever</span>
-                <span className="text-[10px] text-slate-400">Surf Excel</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-red-500 font-mono font-black">RFL</span>
-                <span className="text-[10px] text-slate-400">Winner</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-pink-400 font-mono font-black">bKash</span>
-                <span className="text-[10px] text-slate-400">Merchant</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 font-bold text-slate-200 shadow-2xs">
-                <span className="text-amber-400 font-mono font-black">Nagad</span>
-                <span className="text-[10px] text-slate-400">Business</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
     </section>
   );
