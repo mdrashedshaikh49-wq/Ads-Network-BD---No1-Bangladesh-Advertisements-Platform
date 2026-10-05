@@ -114,7 +114,10 @@ interface Database {
 }
 
 // Path to db.json file
-const DB_FILE = path.join(__dirname, 'db.json');
+let DB_FILE = path.join(__dirname, 'db.json');
+if (process.env.VERCEL) {
+  DB_FILE = path.join('/tmp', 'db.json');
+}
 
 // 10 Requested YouTube Video Ads
 export const INITIAL_VIDEOS: Video[] = [
@@ -490,6 +493,19 @@ const defaultDatabaseState: Database = {
 function getDB(): Database {
   try {
     let db: Database;
+
+    // Copy initial db.json to /tmp/db.json on Vercel
+    if (process.env.VERCEL && !fs.existsSync(DB_FILE)) {
+      const initialPath = path.join(__dirname, 'db.json');
+      if (fs.existsSync(initialPath)) {
+        try {
+          fs.writeFileSync(DB_FILE, fs.readFileSync(initialPath, 'utf-8'));
+        } catch (copyErr) {
+          console.error('Failed to copy db.json to /tmp:', copyErr);
+        }
+      }
+    }
+
     if (!fs.existsSync(DB_FILE)) {
       db = defaultDatabaseState;
     } else {
@@ -575,8 +591,9 @@ function saveDB(db: Database) {
   }
 }
 
+export const app = express();
+
 async function startServer() {
-  const app = express();
   app.use(express.json());
 
   // Initialize DB
@@ -2050,10 +2067,14 @@ function cleanYouTubeUrl(rawUrl: string): string {
     });
   }
 
-  const port = process.env.PORT || 3000;
-  app.listen(port, () => {
-    console.log(`[VidEarn] Server running successfully on port ${port}`);
-  });
+  if (!process.env.VERCEL) {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => {
+      console.log(`[VidEarn] Server running successfully on port ${port}`);
+    });
+  }
 }
 
 startServer();
+
+export default app;
