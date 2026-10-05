@@ -27,6 +27,7 @@ interface User {
   referredBy?: string;
   referralCount?: number;
   referralEarnings?: number;
+  googleEmail?: string;
 }
 
 export const PACKAGES_MAP: Record<string, { name: string; price: number; dailyLimit: number; rewardPerVideo: number }> = {
@@ -874,6 +875,139 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
     } catch (err) {
       console.error('Error in /api/auth/login:', err);
       return res.status(500).json({ success: false, message: 'সার্ভার সার্ভিসে ত্রুটি হয়েছে। আবার চেষ্টা করুন।' });
+    }
+  });
+
+  // Google Sign-In & Sign-Up Endpoint
+  app.post('/api/auth/google', (req, res) => {
+    try {
+      const { email, displayName, googleId, referredBy } = req.body;
+      const cleanEmail = email ? String(email).trim().toLowerCase() : '';
+      const cleanName = displayName ? String(displayName).trim() : '';
+
+      if (!cleanEmail) {
+        return res.status(400).json({ success: false, message: 'গুগল ইমেইল প্রয়োজন।' });
+      }
+
+      const db = getDB();
+
+      // 1. Search for existing user by googleEmail
+      let user = db.users.find(u => u.googleEmail && u.googleEmail.trim().toLowerCase() === cleanEmail);
+
+      // 2. If not found by googleEmail, check if a user with the same phone or just create a new one
+      if (!user) {
+        // Find a unique username based on display name or email prefix
+        let baseUsername = cleanName || cleanEmail.split('@')[0];
+        // Strip non-alphanumeric characters from username for clean URLs
+        baseUsername = baseUsername.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+        if (!baseUsername) baseUsername = 'User';
+
+        let uniqueUsername = baseUsername;
+        let counter = 1;
+        while (db.users.some(u => u.username && u.username.trim().toLowerCase() === uniqueUsername.toLowerCase())) {
+          uniqueUsername = `${baseUsername}${counter}`;
+          counter++;
+        }
+
+        const newUser: User = {
+          id: 'google-user-' + (googleId || Date.now()),
+          username: uniqueUsername,
+          phone: '', // Can be linked later
+          googleEmail: cleanEmail,
+          balance: 0,
+          todayEarnings: 0,
+          totalEarnings: 0,
+          pendingRewards: 0,
+          completedTasksCount: 0,
+          createdAt: new Date().toISOString(),
+          isAdmin: false,
+          currentPackage: 'Free',
+          referredBy: '',
+          referralCount: 0,
+          referralEarnings: 0
+        };
+
+        // Process referral if registered under invite link
+        if (referredBy) {
+          const cleanRef = String(referredBy).trim().toLowerCase();
+          const referrer = db.users.find(u => 
+            (u.username && String(u.username).trim().toLowerCase() === cleanRef) || 
+            (u.id && String(u.id).trim().toLowerCase() === cleanRef)
+          );
+
+          if (referrer) {
+            referrer.balance = (referrer.balance || 0) + 50;
+            referrer.totalEarnings = (referrer.totalEarnings || 0) + 50;
+            referrer.referralCount = (referrer.referralCount || 0) + 1;
+            referrer.referralEarnings = (referrer.referralEarnings || 0) + 50;
+            newUser.referredBy = referrer.username;
+
+            // Record bonus transaction for referrer
+            const transactionId = 'REF' + Date.now().toString() + Math.floor(Math.random() * 100);
+            const newTransaction: Transaction = {
+              id: transactionId,
+              userId: referrer.id,
+              username: referrer.username,
+              amount: 50,
+              type: 'bonus',
+              completionTime: new Date().toLocaleString('bn-BD'),
+              status: 'Credited',
+              createdDate: new Date().toISOString(),
+              videoTitle: `🎁 রেফারেল বোনাস (${uniqueUsername} রেজিস্ট্রেশন করেছেন)`
+            };
+            db.transactions.push(newTransaction);
+          }
+        }
+
+        db.users.push(newUser);
+        db.stats.registeredUsers += 1;
+        saveDB(db);
+
+        return res.status(201).json({ success: true, user: newUser, isNew: true, message: 'গুগল অ্যাকাউন্ট দিয়ে সফলভাবে রেজিস্ট্রেশন সম্পন্ন হয়েছে!' });
+      }
+
+      return res.json({ success: true, user, isNew: false, message: 'গুগল অ্যাকাউন্ট দিয়ে সফলভাবে লগইন সম্পন্ন হয়েছে!' });
+    } catch (err) {
+      console.error('Error in /api/auth/google:', err);
+      return res.status(500).json({ success: false, message: 'সার্ভার সার্ভিসে গুগল অথেন্টিকেশনে ত্রুটি হয়েছে।' });
+    }
+  });
+
+  // Link Phone Number (For Google Users)
+  app.post('/api/user/link-phone', (req, res) => {
+    try {
+      const { userId, phone } = req.body;
+      const cleanPhone = phone ? String(phone).trim() : '';
+
+      if (!userId || !cleanPhone) {
+        return res.status(400).json({ success: false, message: 'ইউজার আইডি এবং ফোন নম্বর আবশ্যক।' });
+      }
+
+      const db = getDB();
+      const userIndex = db.users.findIndex(u => u.id === userId);
+      if (userIndex === -1) {
+        return res.status(404).json({ success: false, message: 'ব্যবহারকারী পাওয়া যায়নি।' });
+      }
+
+      const user = db.users[userIndex];
+      const cleanPhoneNormalized = normalizePhone(cleanPhone);
+
+      // Check if phone already registered by another user
+      const existing = db.users.find(u => 
+        u.id !== userId && u.phone && normalizePhone(u.phone) === cleanPhoneNormalized
+      );
+
+      if (existing) {
+        return res.status(400).json({ success: false, message: 'এই নম্বরটি ইতিমধ্যেই অন্য একটি অ্যাকাউন্টে সংযুক্ত করা আছে।' });
+      }
+
+      user.phone = cleanPhone;
+      saveDB(db);
+
+      return res.json({ success: true, user, message: 'আপনার মোবাইল নম্বরটি সফলভাবে অ্যাকাউন্টে সংযুক্ত হয়েছে!' });
+    } catch (err) {
+      console.error('Error in /api/user/link-phone:', err);
+      return res.status(500).json({ success: false, message: 'মোবাইল নম্বর সংযুক্ত করতে সমস্যা হয়েছে।' });
     }
   });
 
