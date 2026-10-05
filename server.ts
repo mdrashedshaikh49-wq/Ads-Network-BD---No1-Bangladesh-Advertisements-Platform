@@ -737,6 +737,22 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
     }
   });
 
+  // Helper to normalize Bangladesh phone numbers safely
+  function normalizePhone(phone: any): string {
+    if (!phone) return '';
+    let cleaned = String(phone).replace(/\D/g, ''); // keep only digits
+    if (cleaned.startsWith('880') && cleaned.length === 14) {
+      cleaned = cleaned.substring(2);
+    } else if (cleaned.startsWith('880') && cleaned.length === 13) {
+      cleaned = cleaned.substring(3);
+    } else if (cleaned.startsWith('0') && cleaned.length === 11) {
+      // standard 11-digit phone number
+    } else if (cleaned.length === 10 && !cleaned.startsWith('0')) {
+      cleaned = '0' + cleaned;
+    }
+    return cleaned;
+  }
+
   // Register
   app.post('/api/auth/register', (req, res) => {
     try {
@@ -750,9 +766,11 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
       }
 
       const db = getDB();
+      const cleanPhoneNormalized = normalizePhone(cleanPhone);
+      
       const existing = db.users.find(u => 
-        (u.phone && u.phone.trim().toLowerCase() === cleanPhone.toLowerCase()) ||
-        (u.username && u.username.trim().toLowerCase() === cleanUsername.toLowerCase())
+        (u.phone && normalizePhone(u.phone) === cleanPhoneNormalized) ||
+        (u.username && String(u.username).trim().toLowerCase() === cleanUsername.toLowerCase())
       );
 
       if (existing) {
@@ -781,8 +799,8 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
       if (referredBy) {
         const cleanRef = String(referredBy).trim().toLowerCase();
         const referrer = db.users.find(u => 
-          u.username.toLowerCase() === cleanRef || 
-          u.id.toLowerCase() === cleanRef
+          (u.username && String(u.username).trim().toLowerCase() === cleanRef) || 
+          (u.id && String(u.id).trim().toLowerCase() === cleanRef)
         );
 
         if (referrer) {
@@ -832,19 +850,23 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
       }
 
       const db = getDB();
+      const loginPhoneNormalized = normalizePhone(loginIdentifier);
 
-      // Find user by phone OR username
+      // Find user by phone OR username safely
       const user = db.users.find(u => 
-        (u.phone && u.phone.trim().toLowerCase() === loginIdentifier) || 
-        (u.username && u.username.trim().toLowerCase() === loginIdentifier)
+        (u.phone && normalizePhone(u.phone) === loginPhoneNormalized) || 
+        (u.username && String(u.username).trim().toLowerCase() === loginIdentifier)
       );
 
       if (!user) {
         return res.status(400).json({ success: false, message: 'এই ইউজারনেম বা মোবাইল নম্বরে কোনো অ্যাকাউন্ট খুঁজে পাওয়া যায়নি। নতুন অ্যাকাউন্ট তৈরি করুন।' });
       }
 
-      // Verify password if user has password set
-      if (user.password && user.password !== cleanPassword) {
+      // Automatically migrate/set password for legacy users who do not have one set yet
+      if (!user.password && cleanPassword) {
+        user.password = cleanPassword;
+        saveDB(db);
+      } else if (user.password && user.password !== cleanPassword) {
         return res.status(400).json({ success: false, message: 'ভুল পাসওয়ার্ড দিয়েছেন। সঠিক পাসওয়ার্ড দিয়ে আবার চেষ্টা করুন।' });
       }
 

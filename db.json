@@ -53,6 +53,23 @@
       "createdAt": "2026-10-02T14:04:22.471Z",
       "isAdmin": false,
       "currentPackage": "silver"
+    },
+    {
+      "id": "user-1791193901049",
+      "username": "TestUserUnique",
+      "phone": "01555555555",
+      "password": "password123",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-05T09:51:41.049Z",
+      "isAdmin": false,
+      "currentPackage": "Free",
+      "referredBy": "",
+      "referralCount": 0,
+      "referralEarnings": 0
     }
   ],
   "videos": [
@@ -491,7 +508,7 @@
     }
   ],
   "stats": {
-    "registeredUsers": 25484,
+    "registeredUsers": 25485,
     "videosWatched": 1248325,
     "rewardsDistributed": 5045310,
     "activeTasks": 23
