@@ -983,7 +983,7 @@ export default function App() {
               </button>
             </form>
 
-// Google login button removed
+
 
             <div className="mt-5 pt-4 border-t border-slate-50 text-center text-xs">
               <span className="text-slate-400">নতুন ব্যবহারকারী? </span>
@@ -1154,7 +1154,7 @@ export default function App() {
               </button>
             </form>
 
-// Google register button removed
+
 
             <div className="mt-5 pt-4 border-t border-slate-50 text-center text-xs">
               <span className="text-slate-400">ইতিমধ্যেই অ্যাকাউন্ট আছে? </span>
