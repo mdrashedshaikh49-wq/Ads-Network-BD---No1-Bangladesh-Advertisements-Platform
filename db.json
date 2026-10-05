@@ -70,6 +70,23 @@
       "referredBy": "",
       "referralCount": 0,
       "referralEarnings": 0
+    },
+    {
+      "id": "google-user-TQAk1SEviDgzt6WISo6Zh2vvQXf2",
+      "username": "MD JAKIR HOSEN",
+      "phone": "",
+      "googleEmail": "mdrashedshaikh49@gmail.com",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-05T11:16:44.379Z",
+      "isAdmin": false,
+      "currentPackage": "Free",
+      "referredBy": "",
+      "referralCount": 0,
+      "referralEarnings": 0
     }
   ],
   "videos": [
@@ -508,7 +525,7 @@
     }
   ],
   "stats": {
-    "registeredUsers": 25485,
+    "registeredUsers": 25486,
     "videosWatched": 1248325,
     "rewardsDistributed": 5045310,
     "activeTasks": 23

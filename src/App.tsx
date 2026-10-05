@@ -555,6 +555,8 @@ export default function App() {
 
       if (errorCode === 'auth/unauthorized-domain') {
         setAuthError(`ডোমেন অনুমোদিত নয়! দয়া করে আপনার Firebase Console -> Authentication -> Settings -> Authorized Domains-এ গিয়ে "${window.location.hostname}" ডোমেনটি যুক্ত করুন।`);
+      } else if (errorCode.includes('requests-from-referer') || errorMsg.includes('are-blocked') || errorMsg.includes('referer')) {
+        setAuthError(`API Key রেস্ট্রিকশন সমস্যা! আপনার Google Cloud Console (APIs & Services -> Credentials)-এ গিয়ে আপনার API Key-এর 'Application restrictions' থেকে HTTP referrers রেস্ট্রিকশন উঠিয়ে দিন (অথবা "${window.location.origin}/*" যুক্ত করুন)।`);
       } else if (errorCode === 'auth/popup-blocked') {
         setAuthError('পপ-আপ ব্লক করা হয়েছে! আপনার ব্রাউজার সেটিংস থেকে পপ-আপ অ্যালাউ (Allow) করুন এবং আবার চেষ্টা করুন।');
       } else if (errorCode === 'auth/popup-closed-by-user') {
