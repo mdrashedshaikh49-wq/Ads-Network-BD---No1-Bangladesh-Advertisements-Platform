@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-start: var(--brand-primary-start, #1e40af);
+  --color-primary-end: var(--brand-primary-end, #4338ca);
+  --color-secondary: var(--brand-secondary, #0f172a);
+  --color-accent: var(--brand-accent, #059669);
+}
+
+:root {
+  --brand-primary-start: #1e40af;
+  --brand-primary-end: #4338ca;
+  --brand-secondary: #0f172a;
+  --brand-accent: #059669;
+  --brand-bg: #f8fafc;
+}
+
+body {
+  background-color: var(--brand-bg);
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--brand-secondary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom CSS Scrollbar and Smooth Layouts */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Commercial Glassmorphism & Enterprise Cards */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.commercial-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease-in-out;
+}
+
+.commercial-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Shimmer animation for stats */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-anim {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Continuous Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+
+.mask-gradient {
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+

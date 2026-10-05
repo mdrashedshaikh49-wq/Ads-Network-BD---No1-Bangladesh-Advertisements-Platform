@@ -1,0 +1,8 @@
+{
+  "name": "Remix Ads Network BD - ১০০০+ শীর্ষ কর্পোরেট কমার্শিয়াল ভিডিও অ্যাড ও ইনকাম প্ল্যাটফর্ম",
+  "description": "Ads Network BD — দেশের ১০০০+ শীর্ষ কর্পোরেট ব্র্যান্ডের (Grameenphone, Banglalink, Coca-Cola, Unilever, RFL, bKash) অনুমোদিত বাণিজ্যিক ভিডিও বিজ্ঞাপন দেখুন, নিজস্ব সোশ্যাল মিডিয়ায় শেয়ার করুন ও সহজে বিকাশ, নগদ বা রকেটে নিশ্চিত রিওয়ার্ড ইনকাম করুন।",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
