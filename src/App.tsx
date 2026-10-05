@@ -13,7 +13,7 @@ import RealTimeEarningsTicker from './components/RealTimeEarningsTicker';
 import BrandLogo from './components/BrandLogo';
 import TelegramFloatingChat from './components/TelegramFloatingChat';
 import SponsorLogos from './components/SponsorLogos';
-import { signInWithGoogle, logoutGoogle, checkRedirectResult } from './utils/firebaseAuth';
+// Google auth removed
 
 export const PACKAGE_DAILY_LIMITS: Record<string, { name: string; limit: number; rewardPerVideo: number }> = {
   starter: { name: 'Starter', limit: 1, rewardPerVideo: 50 },
@@ -355,6 +355,10 @@ export default function App() {
   const [authPassword, setAuthPassword] = useState('');
   const [authName, setAuthName] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null);
+  const [forgotError, setForgotError] = useState<string | null>(null);
 
   // Admin panel visibility
   const [showAdmin, setShowAdmin] = useState(false);
@@ -448,35 +452,7 @@ export default function App() {
       setUser(JSON.parse(saved));
     }
 
-    // Check Google Redirect Result after returning from Google
-    checkRedirectResult().then(async (gUser) => {
-      if (gUser && gUser.email) {
-        const referredBy = localStorage.getItem('watch2earn-referrer') || '';
-        try {
-          const res = await fetch('/api/auth/google', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: gUser.email,
-              displayName: gUser.displayName,
-              googleId: gUser.uid,
-              referredBy
-            })
-          });
-          const data = await res.json().catch(() => null);
-          if (data && data.success) {
-            setUser(data.user);
-            localStorage.setItem('watch2earn-user', JSON.stringify(data.user));
-            localStorage.removeItem('watch2earn-referrer');
-            loadData();
-          }
-        } catch (err) {
-          console.error('Error processing Google redirect login:', err);
-        }
-      }
-    }).catch((err) => {
-      console.error('Redirect result error:', err);
-    });
+    // Google redirect check removed
   }, []);
 
   const [phoneToLink, setPhoneToLink] = useState('');
@@ -514,62 +490,7 @@ export default function App() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setAuthError(null);
-    try {
-      const gUser = await signInWithGoogle();
-      if (!gUser) {
-        // Fallback redirect flow triggered, page is redirecting
-        return;
-      }
-
-      const referredBy = localStorage.getItem('watch2earn-referrer') || '';
-
-      const res = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: gUser.email,
-          displayName: gUser.displayName,
-          googleId: gUser.uid,
-          referredBy
-        })
-      });
-
-      const data = await res.json().catch(() => null);
-
-      if (data && data.success) {
-        setUser(data.user);
-        localStorage.setItem('watch2earn-user', JSON.stringify(data.user));
-        localStorage.removeItem('watch2earn-referrer'); // clear referrer
-        setShowLogin(false);
-        setShowRegister(false);
-        loadData(); // refresh transactions list and stats
-      } else {
-        setAuthError((data && data.message) ? data.message : 'গুগল সাইন ইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
-      }
-    } catch (err: any) {
-      console.error('Google Sign In Error:', err);
-      const errorCode = err?.code || '';
-      const errorMsg = err?.message || '';
-
-      if (errorCode === 'auth/unauthorized-domain') {
-        setAuthError(`ডোমেন অনুমোদিত নয়! দয়া করে আপনার Firebase Console -> Authentication -> Settings -> Authorized Domains-এ গিয়ে "${window.location.hostname}" ডোমেনটি যুক্ত করুন।`);
-      } else if (errorCode.includes('requests-from-referer') || errorMsg.includes('are-blocked') || errorMsg.includes('referer')) {
-        setAuthError(`API Key রেস্ট্রিকশন সমস্যা! আপনার Google Cloud Console (APIs & Services -> Credentials)-এ গিয়ে আপনার API Key-এর 'Application restrictions' থেকে HTTP referrers রেস্ট্রিকশন উঠিয়ে দিন (অথবা "${window.location.origin}/*" যুক্ত করুন)।`);
-      } else if (errorCode === 'auth/popup-blocked') {
-        setAuthError('পপ-আপ ব্লক করা হয়েছে! আপনার ব্রাউজার সেটিংস থেকে পপ-আপ অ্যালাউ (Allow) করুন এবং আবার চেষ্টা করুন।');
-      } else if (errorCode === 'auth/popup-closed-by-user') {
-        setAuthError('লগইন পপ-আপ উইন্ডোটি আপনি বন্ধ করে দিয়েছেন। সম্পূর্ণ লগইন করতে আবার ক্লিক করুন।');
-      } else if (errorCode === 'auth/operation-not-allowed') {
-        setAuthError('গুগল সাইন-ইন সক্রিয় নেই! দয়া করে Firebase Console -> Authentication -> Sign-in method-এ গিয়ে Google প্রোভাইডারটি এনাবল (Enable) করুন।');
-      } else if (errorCode === 'auth/network-request-failed') {
-        setAuthError('নেটওয়ার্ক সংযোগ বিঘ্নিত হয়েছে। আপনার ইন্টারনেট কানেকশন চেক করে আবার চেষ্টা করুন।');
-      } else {
-        setAuthError(`গুগল সাইন ইন ত্রুটি (${errorCode || 'Error'}): ${errorMsg || 'আবার চেষ্টা করুন।'}`);
-      }
-    }
-  };
+  // handleGoogleSignIn removed
 
   // Handle Login submission
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -605,6 +526,33 @@ export default function App() {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError(null);
+    setForgotMessage(null);
+
+    if (!forgotIdentifier.trim()) {
+      setForgotError('দয়া করে আপনার ইউজারনেম বা মোবাইল নম্বর প্রদান করুন।');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: forgotIdentifier })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotMessage(data.message);
+      } else {
+        setForgotError(data.message || 'রিকভারি রিকোয়েস্ট ব্যর্থ হয়েছে।');
+      }
+    } catch (err) {
+      setForgotError('সার্ভারে যোগাযোগ করতে সমস্যা হয়েছে।');
+    }
+  };
+
   // Handle Register submission
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -612,6 +560,11 @@ export default function App() {
 
     if (!authName || !authPhone || !authPassword) {
       setAuthError('সবগুলো তথ্য (ইউজারনেম, ফোন নম্বর ও পাসওয়ার্ড) সঠিকভাবে পূরণ করুন।');
+      return;
+    }
+
+    if (authPassword.length < 6 || !/[a-zA-Z]/.test(authPassword) || !/[0-9]/.test(authPassword)) {
+      setAuthError('পাসওয়ার্ড অন্তত ৬ অক্ষর দীর্ঘ হতে হবে এবং এতে ইংরেজি বর্ণ ও সংখ্যা উভয়ই থাকতে হবে।');
       return;
     }
 
@@ -647,7 +600,6 @@ export default function App() {
   const handleLogout = async () => {
     setUser(null);
     localStorage.removeItem('watch2earn-user');
-    await logoutGoogle();
     setActiveTab('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -1000,6 +952,21 @@ export default function App() {
                   placeholder="কমপক্ষে ৪টি সংখ্যা বা ক্যারেক্টার"
                   className="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[var(--brand-primary-start)]"
                 />
+                <div className="flex justify-end mt-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowLogin(false);
+                      setForgotIdentifier(authPhone);
+                      setForgotMessage(null);
+                      setForgotError(null);
+                      setShowForgotPasswordModal(true);
+                    }}
+                    className="text-[11px] text-blue-600 hover:underline font-semibold cursor-pointer"
+                  >
+                    পাসওয়ার্ড ভুলে গেছেন?
+                  </button>
+                </div>
               </div>
 
               {authError && (
@@ -1016,25 +983,7 @@ export default function App() {
               </button>
             </form>
 
-            <div className="relative flex items-center justify-center my-4">
-              <div className="border-t border-slate-100 w-full"></div>
-              <span className="bg-white px-3 text-slate-400 text-[10px] font-bold absolute uppercase tracking-wider">অথবা (OR)</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 48 48" style={{ display: 'block' }}>
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                <path fill="none" d="M0 0h48v48H0z"></path>
-              </svg>
-              Google অ্যাকাউন্ট দিয়ে লগইন
-            </button>
+// Google login button removed
 
             <div className="mt-5 pt-4 border-t border-slate-50 text-center text-xs">
               <span className="text-slate-400">নতুন ব্যবহারকারী? </span>
@@ -1043,6 +992,74 @@ export default function App() {
                 className="text-[var(--brand-primary-start)] font-bold hover:underline cursor-pointer"
               >
                 নতুন অ্যাকাউন্ট খুলুন
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {showForgotPasswordModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-100 text-left relative overflow-hidden animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowForgotPasswordModal(false)} 
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mt-1">পাসওয়ার্ড রিকভারি</h3>
+              <p className="text-xs text-slate-400 mt-0.5">আপনার নিবন্ধিত ইউজারনেম বা মোবাইল নম্বর দিন।</p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 flex items-center gap-1">
+                  <Smartphone className="w-3.5 h-3.5" />
+                  ইউজারনেম / মোবাইল নম্বর
+                </label>
+                <input
+                  type="text"
+                  value={forgotIdentifier}
+                  onChange={(e) => setForgotIdentifier(e.target.value)}
+                  placeholder="যেমন: Jakirhosen150 অথবা 01987654321"
+                  className="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[var(--brand-primary-start)]"
+                />
+              </div>
+
+              {forgotError && (
+                <div className="p-2.5 bg-red-50 text-red-800 border border-red-100 rounded-xl text-xs font-bold">
+                  ⚠ {forgotError}
+                </div>
+              )}
+
+              {forgotMessage && (
+                <div className="p-3 bg-emerald-50 text-emerald-900 border border-emerald-100 rounded-xl text-xs font-bold leading-relaxed">
+                  ✅ {forgotMessage}
+                </div>
+              )}
+
+              {!forgotMessage && (
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+                >
+                  পাসওয়ার্ড পুনরুদ্ধার করুন
+                </button>
+              )}
+            </form>
+
+            <div className="mt-5 pt-4 border-t border-slate-50 text-center text-xs">
+              <button 
+                onClick={() => { setShowForgotPasswordModal(false); setShowLogin(true); }}
+                className="text-[var(--brand-primary-start)] font-bold hover:underline cursor-pointer"
+              >
+                লগইন পেজে ফিরে যান
               </button>
             </div>
           </div>
@@ -1110,9 +1127,17 @@ export default function App() {
                   type="password"
                   value={authPassword}
                   onChange={(e) => setAuthPassword(e.target.value)}
-                  placeholder="কমপক্ষে ৪টি সংখ্যা বা ক্যারেক্টার"
+                  placeholder="কমপক্ষে ৬ অক্ষর, বর্ণ ও সংখ্যা"
                   className="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-[var(--brand-primary-start)]"
                 />
+                <div className="mt-2 space-y-1 text-[11px]">
+                  <div className={`flex items-center gap-1.5 ${authPassword.length >= 6 ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    <span>{authPassword.length >= 6 ? '✓' : '•'}</span> কমপক্ষে ৬ অক্ষর দীর্ঘ
+                  </div>
+                  <div className={`flex items-center gap-1.5 ${(/[a-zA-Z]/.test(authPassword) && /[0-9]/.test(authPassword)) ? 'text-emerald-600 font-semibold' : 'text-slate-400'}`}>
+                    <span>{(/[a-zA-Z]/.test(authPassword) && /[0-9]/.test(authPassword)) ? '✓' : '•'}</span> ইংরেজি বর্ণ এবং সংখ্যা থাকতে হবে
+                  </div>
+                </div>
               </div>
 
               {authError && (
@@ -1129,25 +1154,7 @@ export default function App() {
               </button>
             </form>
 
-            <div className="relative flex items-center justify-center my-4">
-              <div className="border-t border-slate-100 w-full"></div>
-              <span className="bg-white px-3 text-slate-400 text-[10px] font-bold absolute uppercase tracking-wider">অথবা (OR)</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              className="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <svg className="w-4 h-4 shrink-0" viewBox="0 0 48 48" style={{ display: 'block' }}>
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                <path fill="none" d="M0 0h48v48H0z"></path>
-              </svg>
-              Google অ্যাকাউন্ট দিয়ে সাইন আপ
-            </button>
+// Google register button removed
 
             <div className="mt-5 pt-4 border-t border-slate-50 text-center text-xs">
               <span className="text-slate-400">ইতিমধ্যেই অ্যাকাউন্ট আছে? </span>

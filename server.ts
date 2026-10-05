@@ -895,6 +895,41 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
     }
   });
 
+  // Forgot Password Endpoint
+  app.post('/api/auth/forgot-password', (req, res) => {
+    try {
+      const { identifier } = req.body;
+      const cleanId = identifier ? String(identifier).trim().toLowerCase() : '';
+      if (!cleanId) {
+        return res.status(400).json({ success: false, message: 'দয়া করে আপনার ইউজারনেম অথবা মোবাইল নম্বর প্রদান করুন।' });
+      }
+
+      const db = getDB();
+      const normPhone = normalizePhone(cleanId);
+      const user = db.users.find(u => 
+        (u.phone && normalizePhone(u.phone) === normPhone) ||
+        (u.username && String(u.username).trim().toLowerCase() === cleanId)
+      );
+
+      if (!user) {
+        return res.status(400).json({ success: false, message: 'এই ইউজারনেম বা মোবাইল নম্বরে কোনো অ্যাকাউন্ট নিবন্ধিত নেই।' });
+      }
+
+      // Generate a temporary reset code / password
+      const tempPassword = 'Pass' + Math.floor(1000 + Math.random() * 9000);
+      user.password = tempPassword;
+      saveDB(db);
+
+      return res.json({ 
+        success: true, 
+        message: `পাসওয়ার্ড রিকভারি সফল! আপনার অস্থায়ী নতুন পাসওয়ার্ড: ${tempPassword} (এটি দিয়ে লগইন করে পরবর্তীতে পরিবর্তন করতে পারবেন)।` 
+      });
+    } catch (err) {
+      console.error('Error in /api/auth/forgot-password:', err);
+      return res.status(500).json({ success: false, message: 'পাসওয়ার্ড রিকভারি প্রসেসিংয়ে ত্রুটি হয়েছে।' });
+    }
+  });
+
   // Google Sign-In & Sign-Up Endpoint
   app.post('/api/auth/google', (req, res) => {
     try {
@@ -2037,7 +2072,7 @@ function cleanYouTubeUrl(rawUrl: string): string {
   // ----------------------------------------
   // INTEGRATE VITE FOR DEV / PRODUCTION SERVING
   // ----------------------------------------
-  const isProd = process.env.NODE_ENV === 'production' || fs.existsSync(path.resolve(__dirname, 'dist'));
+  const isProd = (process.env.NODE_ENV === 'production' || process.env.VERCEL) && fs.existsSync(path.resolve(__dirname, 'dist/index.html'));
   if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
