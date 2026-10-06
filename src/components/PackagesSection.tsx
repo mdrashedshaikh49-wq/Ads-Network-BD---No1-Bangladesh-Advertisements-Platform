@@ -156,54 +156,100 @@ export default function PackagesSection({ user, onRefreshUser, onOpenLogin }: Pa
   };
 
   const handleOpenBuy = (pkg: any) => {
-    if (!user) {
+    let currentUser = user;
+    if (!currentUser) {
+      const savedUserStr = localStorage.getItem('watch2earn-user');
+      if (savedUserStr) {
+        try { currentUser = JSON.parse(savedUserStr); } catch {}
+      }
+    }
+    if (!currentUser) {
       onOpenLogin();
       return;
     }
     setSelectedPkg(pkg);
     setSuccessMsg(null);
     setErrorMsg(null);
-    setPhone(user.phone || '');
+    setPhone(currentUser.phone || '');
     setTrxId('');
   };
 
   const handlePurchaseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPkg || !user) return;
 
-    if (!phone) {
+    let currentUser = user;
+    if (!currentUser) {
+      const savedUserStr = localStorage.getItem('watch2earn-user');
+      if (savedUserStr) {
+        try { currentUser = JSON.parse(savedUserStr); } catch {}
+      }
+    }
+
+    if (!selectedPkg) {
+      setErrorMsg(isBn ? 'অনুগ্রহ করে একটি প্যাকেজ নির্বাচন করুন।' : 'Please select a package.');
+      return;
+    }
+
+    if (!currentUser) {
+      setErrorMsg(isBn ? 'ডিপোজিট সাবমিট করতে প্রথমে আপনার অ্যাকাউন্টে লগইন করুন।' : 'Please login to submit deposit.');
+      onOpenLogin();
+      return;
+    }
+
+    const cleanPhone = phone ? phone.trim() : '';
+    if (!cleanPhone) {
       setErrorMsg(isBn ? 'অনুগ্রহ করে আপনার পেমেন্ট সেন্ডার নম্বরটি প্রদান করুন।' : 'Please provide your payment sender phone number.');
+      return;
+    }
+
+    if (cleanPhone.length < 11) {
+      setErrorMsg(isBn ? 'দয়া করে সঠিক ১১ ডিজিটের সেন্ডার মোবাইল নম্বর লিখুন।' : 'Please enter a valid 11-digit mobile number.');
       return;
     }
 
     setIsBuying(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const cleanTrx = trxId ? trxId.trim() : '';
 
     try {
       const res = await fetch('/api/packages/buy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: user.id,
+          userId: currentUser.id,
+          username: currentUser.username,
           packageKey: selectedPkg.key,
           paymentMethod,
-          accountPhone: phone,
-          trxId
+          accountPhone: cleanPhone,
+          trxId: cleanTrx
         })
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-      if (data.success) {
+      if (data && data.success) {
         setSuccessMsg(data.message);
-        onRefreshUser(); // Immediately syncs layout with newly subscribed package details
+        // Immediately persist updated user in localStorage
+        if (data.user) {
+          localStorage.setItem('watch2earn-user', JSON.stringify(data.user));
+        } else {
+          currentUser.currentPackage = selectedPkg.key;
+          localStorage.setItem('watch2earn-user', JSON.stringify(currentUser));
+        }
+        if (onRefreshUser) {
+          onRefreshUser(); // Immediately syncs layout with newly subscribed package details
+        }
         setTimeout(() => {
           setSelectedPkg(null);
-        }, 3000);
+          setSuccessMsg(null);
+          setTrxId('');
+        }, 2500);
       } else {
-        setErrorMsg(data.message || (isBn ? 'প্যাকেজ সক্রিয়করণ ব্যর্থ হয়েছে।' : 'Package activation failed.'));
+        setErrorMsg((data && data.message) ? data.message : (isBn ? 'প্যাকেজ সক্রিয়করণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Package activation failed. Please try again.'));
       }
     } catch (err) {
-      setErrorMsg(isBn ? 'সার্ভার সাথে সংযোগ ত্রুটি। আবার চেষ্টা করুন।' : 'Server connection error. Please try again.');
+      setErrorMsg(isBn ? 'সার্ভার সাথে সংযোগ ত্রুটি। ইন্টারনেট চেক করে আবার চেষ্টা করুন।' : 'Server connection error. Please try again.');
     } finally {
       setIsBuying(false);
     }

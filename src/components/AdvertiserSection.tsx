@@ -65,12 +65,13 @@ export default function AdvertiserSection({ onRefreshData }: AdvertiserSectionPr
           url,
           description,
           paymentPhone,
-          paymentMethod
+          paymentMethod,
+          trxId: trxId ? trxId.trim() : ''
         })
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
-      if (data.success) {
+      if (data && data.success) {
         setSuccessMsg(data.message);
         
         // Clear forms
@@ -78,6 +79,7 @@ export default function AdvertiserSection({ onRefreshData }: AdvertiserSectionPr
         setTitle('');
         setUrl('');
         setDescription('');
+        setTrxId('');
         setTargetViews('100');
         
         onRefreshData(); // Immediately updates public stats ticker

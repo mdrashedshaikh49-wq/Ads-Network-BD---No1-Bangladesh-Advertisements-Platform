@@ -155,6 +155,19 @@
       "referredBy": "",
       "referralCount": 0,
       "referralEarnings": 0
+    },
+    {
+      "id": "user-1791257118292",
+      "username": "rashed_test",
+      "phone": "01799887766",
+      "balance": 0,
+      "todayEarnings": 0,
+      "totalEarnings": 0,
+      "pendingRewards": 0,
+      "completedTasksCount": 0,
+      "createdAt": "2026-10-06T03:25:18.292Z",
+      "isAdmin": false,
+      "currentPackage": "gold"
     }
   ],
   "videos": [
@@ -563,6 +576,36 @@
       "completionTime": "৩/১০/২০২৬, ১০:৪৫:২৩ AM",
       "status": "Credited",
       "createdDate": "2026-10-03T10:45:23.599Z"
+    },
+    {
+      "id": "DEP17912568279410",
+      "userId": "admin-user",
+      "username": "Jakirhosen150",
+      "amount": 500,
+      "type": "deposit",
+      "paymentMethod": "bKash",
+      "phone": "01700000000",
+      "trxId": "TEST12345",
+      "packageName": "Starter",
+      "packageKey": "starter",
+      "completionTime": "৬/১০/২০২৬, ৩:২০:২৭ AM",
+      "status": "Pending",
+      "createdDate": "2026-10-06T03:20:27.987Z"
+    },
+    {
+      "id": "DEP179125711829225",
+      "userId": "user-1791257118292",
+      "username": "rashed_test",
+      "amount": 4000,
+      "type": "deposit",
+      "paymentMethod": "bKash (বিকাশ)",
+      "phone": "01799887766",
+      "trxId": "BK7799X102",
+      "packageName": "Gold",
+      "packageKey": "gold",
+      "completionTime": "৬/১০/২০২৬, ৩:২৫:১৮ AM",
+      "status": "Pending",
+      "createdDate": "2026-10-06T03:25:18.301Z"
     }
   ],
   "faqs": [

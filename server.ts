@@ -1558,53 +1558,85 @@ Sitemap: ${host}/sitemap.xml`);
 
   // 3b. PURCHASE SUBSCRIPTION PACKAGE / DEPOSIT SUBMISSION
   app.post('/api/packages/buy', (req, res) => {
-    const { userId, packageKey, paymentMethod, accountPhone, trxId } = req.body;
-    if (!userId || !packageKey) {
-      return res.status(400).json({ success: false, message: 'ইউজার আইডি এবং প্যাকেজ তথ্য আবশ্যক।' });
+    try {
+      const { userId, packageKey, paymentMethod, accountPhone, trxId, username } = req.body;
+      if (!packageKey) {
+        return res.status(400).json({ success: false, message: 'প্যাকেজ তথ্য আবশ্যক।' });
+      }
+
+      const db = getDB();
+      const pkg = PACKAGES_MAP[packageKey];
+      if (!pkg) {
+        return res.status(400).json({ success: false, message: 'অবৈধ প্যাকেজ নির্বাচন।' });
+      }
+
+      // Robust user lookup: by ID, by phone, or by username
+      let userIndex = -1;
+      if (userId) {
+        userIndex = db.users.findIndex(u => u.id === userId);
+      }
+      if (userIndex === -1 && accountPhone) {
+        const normAccountPhone = normalizePhone(accountPhone);
+        userIndex = db.users.findIndex(u => u.phone && normalizePhone(u.phone) === normAccountPhone);
+      }
+      if (userIndex === -1 && username) {
+        userIndex = db.users.findIndex(u => u.username && u.username.toLowerCase() === String(username).toLowerCase());
+      }
+
+      // If user is not yet in this database instance (e.g. serverless cold start), restore/create them seamlessly
+      let targetUser: User;
+      if (userIndex !== -1) {
+        targetUser = db.users[userIndex];
+        targetUser.currentPackage = packageKey;
+      } else {
+        targetUser = {
+          id: userId || ('user-' + Date.now()),
+          username: username || accountPhone || 'User',
+          phone: accountPhone || '',
+          balance: 0,
+          todayEarnings: 0,
+          totalEarnings: 0,
+          pendingRewards: 0,
+          completedTasksCount: 0,
+          createdAt: new Date().toISOString(),
+          isAdmin: false,
+          currentPackage: packageKey
+        };
+        db.users.push(targetUser);
+      }
+
+      // Record purchase deposit transaction
+      const transactionId = 'DEP' + Date.now().toString() + Math.floor(Math.random() * 100);
+      const cleanTrx = trxId && String(trxId).trim() ? String(trxId).trim() : ('TRX' + Math.floor(100000 + Math.random() * 900000));
+      const newTransaction: Transaction = {
+        id: transactionId,
+        userId: targetUser.id,
+        username: targetUser.username,
+        amount: pkg.price,
+        type: 'deposit',
+        paymentMethod: paymentMethod || 'bKash (বিকাশ)',
+        phone: accountPhone || targetUser.phone,
+        trxId: cleanTrx,
+        packageName: pkg.name,
+        packageKey: packageKey,
+        completionTime: new Date().toLocaleString('bn-BD'),
+        status: 'Pending', // Displayed in Admin Panel Deposits tab
+        createdDate: new Date().toISOString()
+      };
+
+      db.transactions.push(newTransaction);
+      saveDB(db);
+
+      return res.json({
+        success: true,
+        message: `অভিনন্দন! আপনার (৳${pkg.price.toLocaleString()} - ${pkg.name}) প্যাকেজের ডিপোজিট ট্রানজেকশন (TrxID: ${cleanTrx}) সফলভাবে সাবমিট হয়েছে।`,
+        user: targetUser,
+        transactionId
+      });
+    } catch (err: any) {
+      console.error('Error in /api/packages/buy:', err);
+      return res.status(500).json({ success: false, message: 'সার্ভারে প্রক্রিয়াকরণে ত্রুটি হয়েছে। আবার চেষ্টা করুন।' });
     }
-
-    const db = getDB();
-    const userIndex = db.users.findIndex(u => u.id === userId);
-    if (userIndex === -1) {
-      return res.status(404).json({ success: false, message: 'ব্যবহারকারী পাওয়া যায়নি।' });
-    }
-
-    const user = db.users[userIndex];
-    const pkg = PACKAGES_MAP[packageKey];
-    if (!pkg) {
-      return res.status(400).json({ success: false, message: 'অবৈধ প্যাকেজ নির্বাচন।' });
-    }
-
-    // Activate package for seamless access
-    user.currentPackage = packageKey;
-
-    // Record purchase deposit transaction
-    const transactionId = 'DEP' + Date.now().toString() + Math.floor(Math.random() * 100);
-    const newTransaction: Transaction = {
-      id: transactionId,
-      userId: user.id,
-      username: user.username,
-      amount: pkg.price,
-      type: 'deposit',
-      paymentMethod: paymentMethod || 'bKash (বিকাশ)',
-      phone: accountPhone || user.phone,
-      trxId: trxId ? String(trxId).trim() : ('TRX' + Math.floor(100000 + Math.random() * 900000)),
-      packageName: pkg.name,
-      packageKey: packageKey,
-      completionTime: new Date().toLocaleString('bn-BD'),
-      status: 'Pending', // Displayed in Admin Panel Deposits tab
-      createdDate: new Date().toISOString()
-    };
-
-    db.transactions.push(newTransaction);
-    saveDB(db);
-
-    return res.json({
-      success: true,
-      message: `অভিনন্দন! আপনার (৳${pkg.price.toLocaleString()} - ${pkg.name}) প্যাকেজের ডিপোজিট ট্রানজেকশন সফলভাবে সাবমিট হয়েছে।`,
-      user,
-      transactionId
-    });
   });
 
 function cleanYouTubeUrl(rawUrl: string): string {
@@ -1620,7 +1652,7 @@ function cleanYouTubeUrl(rawUrl: string): string {
 
   // 3c. SUBMIT ADVERTISER CAMPAIGN
   app.post('/api/advertiser/campaign', (req, res) => {
-    const { companyName, title, category, duration, targetViews, url, description, paymentPhone, paymentMethod } = req.body;
+    const { companyName, title, category, duration, targetViews, url, description, paymentPhone, paymentMethod, trxId } = req.body;
     if (!companyName || !title || !url) {
       return res.status(400).json({ success: false, message: 'কোম্পানির নাম, বিজ্ঞাপন শিরোনাম এবং ভিডিও লিংক আবশ্যিক।' });
     }
@@ -1658,6 +1690,7 @@ function cleanYouTubeUrl(rawUrl: string): string {
 
     // Create billing transaction record
     const transactionId = 'ADV' + Date.now().toString() + Math.floor(Math.random() * 100);
+    const cleanTrx = trxId && String(trxId).trim() ? String(trxId).trim() : ('TRX' + Math.floor(100000 + Math.random() * 900000));
     const advTransaction: Transaction = {
       id: transactionId,
       userId: 'advertiser-user',
@@ -1666,6 +1699,7 @@ function cleanYouTubeUrl(rawUrl: string): string {
       type: 'bonus', // Billing presentation
       paymentMethod: paymentMethod || 'bKash (বিকাশ)',
       phone: paymentPhone || 'N/A',
+      trxId: cleanTrx,
       completionTime: new Date().toLocaleString('bn-BD'),
       status: 'Pending', // Pending approval
       createdDate: new Date().toISOString()
