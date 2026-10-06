@@ -596,21 +596,34 @@ export const app = express();
 // Initialize DB synchronously
 getDB();
 
+// Pre-parsed body handler for Vercel serverless functions
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    (req as any)._body = true;
+  }
+  next();
+});
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Global CORS headers for Vercel and custom domains
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
   next();
 });
 
-// Middleware to normalize /api prefix on Vercel
+// Middleware to normalize /api prefix on Vercel and Proxies
 app.use((req, res, next) => {
+  const matched = (req.headers['x-matched-path'] || req.headers['x-vercel-matched-path']) as string;
+  if (matched && !matched.includes('index.html')) {
+    req.url = matched;
+  }
   if (!req.url.startsWith('/api') && !req.url.startsWith('/assets') && !req.url.startsWith('/@') && !req.url.includes('.')) {
     req.url = '/api' + req.url;
   }
