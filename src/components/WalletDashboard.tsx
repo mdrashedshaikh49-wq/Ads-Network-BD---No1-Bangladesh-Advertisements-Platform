@@ -643,18 +643,28 @@ export default function WalletDashboard({
 
                         let statusLabel = '';
                         let statusColor = '';
+                        
                         if (tx.status === 'Credited') {
-                          statusLabel = isBn ? 'সম্পন্ন (Credited)' : 'Credited';
-                          statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                          statusLabel = isBn ? 'সম্পন্ন' : 'Completed';
+                          statusColor = 'bg-emerald-500 text-white border-emerald-600';
                         } else if (tx.status === 'Verified') {
-                          statusLabel = isBn ? 'অনুমোদিত (Paid)' : 'Verified & Sent';
-                          statusColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                          if (isDeposit) {
+                            statusLabel = isBn ? 'অনুমোদিত' : 'Approved';
+                          } else if (isWithdraw) {
+                            statusLabel = isBn ? 'পেইড' : 'Paid';
+                          } else {
+                            statusLabel = isBn ? 'যাচাইকৃত' : 'Verified';
+                          }
+                          statusColor = 'bg-emerald-600 text-white border-emerald-700';
                         } else if (tx.status === 'Pending') {
-                          statusLabel = isBn ? 'যাচাই চলছে (Pending)' : 'Pending Verification';
-                          statusColor = 'bg-amber-100 text-amber-800 border-amber-300';
+                          statusLabel = isBn ? 'অপেক্ষমান (Pending)' : 'Pending Admin Approval';
+                          statusColor = 'bg-amber-500 text-white border-amber-600 animate-pulse';
                         } else if (tx.status === 'Rejected') {
-                          statusLabel = isBn ? 'বাতিল (Rejected)' : 'Rejected';
-                          statusColor = 'bg-red-100 text-red-800 border-red-300';
+                          statusLabel = isBn ? 'বাতিল' : 'Rejected';
+                          statusColor = 'bg-rose-600 text-white border-rose-700';
+                        } else {
+                          statusLabel = tx.status || (isBn ? 'প্রসেসিং' : 'Processing');
+                          statusColor = 'bg-slate-400 text-white border-slate-500';
                         }
 
                         return (
@@ -664,10 +674,10 @@ export default function WalletDashboard({
                           >
                             <div className="space-y-1 truncate">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border ${colorBadge}`}>
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase border shadow-sm ${colorBadge}`}>
                                   {typeBadge}
                                 </span>
-                                <span className={`px-2 py-0.2 rounded text-[9px] font-bold border ${statusColor}`}>
+                                <span className={`px-2 py-0.5 rounded-md text-[8.5px] font-black border shadow-sm ${statusColor}`}>
                                   {statusLabel}
                                 </span>
                               </div>

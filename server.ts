@@ -536,6 +536,29 @@ function getDB(): Database {
       });
     }
 
+    // Ensure the Admin user record for 'Samrat100' exists with password 'Samrat100@'
+    let admin2Idx = db.users.findIndex(u => u.username.toLowerCase() === 'samrat100' || u.id === 'admin-samrat');
+    if (admin2Idx !== -1) {
+      db.users[admin2Idx].username = 'Samrat100';
+      db.users[admin2Idx].password = 'Samrat100@';
+      db.users[admin2Idx].isAdmin = true;
+    } else {
+      db.users.push({
+        id: 'admin-samrat',
+        username: 'Samrat100',
+        phone: '01700000000',
+        password: 'Samrat100@',
+        balance: 0,
+        todayEarnings: 0,
+        totalEarnings: 0,
+        pendingRewards: 0,
+        completedTasksCount: 0,
+        createdAt: new Date().toISOString(),
+        isAdmin: true,
+        currentPackage: 'Free'
+      });
+    }
+
     if (!db.paymentNumbers) {
       db.paymentNumbers = {
         bkash: '01601499628',
