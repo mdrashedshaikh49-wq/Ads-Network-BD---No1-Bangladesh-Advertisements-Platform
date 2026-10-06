@@ -114,7 +114,7 @@ interface Database {
 }
 
 // Path to db.json file
-let DB_FILE = path.join(__dirname, 'db.json');
+let DB_FILE = path.resolve(process.cwd(), 'db.json');
 if (process.env.VERCEL) {
   DB_FILE = path.join('/tmp', 'db.json');
 }
@@ -496,7 +496,7 @@ function getDB(): Database {
 
     // Copy initial db.json to /tmp/db.json on Vercel
     if (process.env.VERCEL && !fs.existsSync(DB_FILE)) {
-      const initialPath = path.join(__dirname, 'db.json');
+      const initialPath = path.resolve(process.cwd(), 'db.json');
       if (fs.existsSync(initialPath)) {
         try {
           fs.writeFileSync(DB_FILE, fs.readFileSync(initialPath, 'utf-8'));
@@ -931,8 +931,11 @@ I. অফিসিয়াল টেলিগ্রাম হেল্পলাই
       );
 
       if (!user) {
+        console.warn(`[Login Failed] User not found for identifier: "${loginIdentifier}" (Normalized Phone: "${loginPhoneNormalized}")`);
         return res.status(400).json({ success: false, message: 'এই ইউজারনেম বা মোবাইল নম্বরে কোনো অ্যাকাউন্ট খুঁজে পাওয়া যায়নি। নতুন অ্যাকাউন্ট তৈরি করুন।' });
       }
+
+      console.log(`[Login Success] User found: ${user.username} (ID: ${user.id})`);
 
       // Automatically migrate/set password for legacy users who do not have one set yet
       if (!user.password && cleanPassword) {
