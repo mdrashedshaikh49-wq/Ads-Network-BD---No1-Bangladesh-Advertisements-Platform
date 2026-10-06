@@ -417,19 +417,37 @@ export default function App() {
     }
   };
 
-  // Sync user profile state (e.g. balance, withdrawals) after successful reward claim or withdraw
+  // Sync user profile state (e.g. balance, withdrawals, packages)
   const refreshUserProfile = async () => {
-    if (!user) return;
+    // 1. Immediately read any fresh state from localStorage
+    const saved = localStorage.getItem('watch2earn-user');
+    let currentUser = user;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        currentUser = parsed;
+      } catch {}
+    }
+
+    if (!currentUser) return;
+
     try {
       const res = await fetch('/api/admin/data');
-      const data = await res.json();
-      if (data.success) {
-        const freshUser = data.users.find((u: any) => u.id === user.id);
+      const data = await res.json().catch(() => null);
+      if (data && data.success && data.users) {
+        const freshUser = data.users.find((u: any) => 
+          u.id === currentUser.id || 
+          (currentUser.phone && u.phone === currentUser.phone) ||
+          (currentUser.username && u.username === currentUser.username)
+        );
         if (freshUser) {
           setUser(freshUser);
           localStorage.setItem('watch2earn-user', JSON.stringify(freshUser));
         }
-        setTransactions(data.transactions);
+        if (data.transactions) {
+          setTransactions(data.transactions);
+        }
       }
     } catch (err) {
       console.error('Failed to refresh user profile:', err);

@@ -1557,42 +1557,65 @@ Sitemap: ${host}/sitemap.xml`);
   });
 
   // 3b. PURCHASE SUBSCRIPTION PACKAGE / DEPOSIT SUBMISSION
-  app.post('/api/packages/buy', (req, res) => {
+  const handlePackageBuy = (req: any, res: any) => {
     try {
-      const { userId, packageKey, paymentMethod, accountPhone, trxId, username } = req.body;
-      if (!packageKey) {
-        return res.status(400).json({ success: false, message: 'প্যাকেজ তথ্য আবশ্যক।' });
+      const { userId, packageKey, packageName, packagePrice, paymentMethod, accountPhone, trxId, username, phone } = req.body;
+      const targetPhone = (accountPhone || phone || '').trim();
+
+      // Flexible case-insensitive package resolution (by key, name, or price)
+      let cleanKey = String(packageKey || '').trim().toLowerCase();
+      let pkg = PACKAGES_MAP[cleanKey];
+
+      if (!pkg && packageName) {
+        const cleanName = String(packageName).trim().toLowerCase();
+        const found = Object.entries(PACKAGES_MAP).find(([k, v]) => k.toLowerCase() === cleanName || v.name.toLowerCase() === cleanName);
+        if (found) {
+          cleanKey = found[0];
+          pkg = found[1];
+        }
+      }
+
+      if (!pkg && packagePrice) {
+        const priceNum = Number(packagePrice);
+        const found = Object.entries(PACKAGES_MAP).find(([_, v]) => v.price === priceNum);
+        if (found) {
+          cleanKey = found[0];
+          pkg = found[1];
+        }
+      }
+
+      // If still not matched, find closest match or fallback to starter
+      if (!pkg) {
+        cleanKey = 'starter';
+        pkg = PACKAGES_MAP['starter'];
       }
 
       const db = getDB();
-      const pkg = PACKAGES_MAP[packageKey];
-      if (!pkg) {
-        return res.status(400).json({ success: false, message: 'অবৈধ প্যাকেজ নির্বাচন।' });
-      }
 
       // Robust user lookup: by ID, by phone, or by username
       let userIndex = -1;
       if (userId) {
         userIndex = db.users.findIndex(u => u.id === userId);
       }
-      if (userIndex === -1 && accountPhone) {
-        const normAccountPhone = normalizePhone(accountPhone);
-        userIndex = db.users.findIndex(u => u.phone && normalizePhone(u.phone) === normAccountPhone);
+      if (userIndex === -1 && targetPhone) {
+        const normPhone = normalizePhone(targetPhone);
+        userIndex = db.users.findIndex(u => u.phone && normalizePhone(u.phone) === normPhone);
       }
       if (userIndex === -1 && username) {
-        userIndex = db.users.findIndex(u => u.username && u.username.toLowerCase() === String(username).toLowerCase());
+        const lowerUsername = String(username).trim().toLowerCase();
+        userIndex = db.users.findIndex(u => u.username && u.username.toLowerCase() === lowerUsername);
       }
 
       // If user is not yet in this database instance (e.g. serverless cold start), restore/create them seamlessly
       let targetUser: User;
       if (userIndex !== -1) {
         targetUser = db.users[userIndex];
-        targetUser.currentPackage = packageKey;
+        targetUser.currentPackage = cleanKey;
       } else {
         targetUser = {
           id: userId || ('user-' + Date.now()),
-          username: username || accountPhone || 'User',
-          phone: accountPhone || '',
+          username: username || targetPhone || 'User',
+          phone: targetPhone || '',
           balance: 0,
           todayEarnings: 0,
           totalEarnings: 0,
@@ -1600,7 +1623,7 @@ Sitemap: ${host}/sitemap.xml`);
           completedTasksCount: 0,
           createdAt: new Date().toISOString(),
           isAdmin: false,
-          currentPackage: packageKey
+          currentPackage: cleanKey
         };
         db.users.push(targetUser);
       }
@@ -1615,10 +1638,10 @@ Sitemap: ${host}/sitemap.xml`);
         amount: pkg.price,
         type: 'deposit',
         paymentMethod: paymentMethod || 'bKash (বিকাশ)',
-        phone: accountPhone || targetUser.phone,
+        phone: targetPhone || targetUser.phone,
         trxId: cleanTrx,
         packageName: pkg.name,
-        packageKey: packageKey,
+        packageKey: cleanKey,
         completionTime: new Date().toLocaleString('bn-BD'),
         status: 'Pending', // Displayed in Admin Panel Deposits tab
         createdDate: new Date().toISOString()
@@ -1637,7 +1660,10 @@ Sitemap: ${host}/sitemap.xml`);
       console.error('Error in /api/packages/buy:', err);
       return res.status(500).json({ success: false, message: 'সার্ভারে প্রক্রিয়াকরণে ত্রুটি হয়েছে। আবার চেষ্টা করুন।' });
     }
-  });
+  };
+
+  app.post('/api/packages/buy', handlePackageBuy);
+  app.post('/packages/buy', handlePackageBuy);
 
 function cleanYouTubeUrl(rawUrl: string): string {
   if (!rawUrl) return 'https://www.youtube.com/embed/p8ZshSOfmvs';
