@@ -367,53 +367,60 @@ export default function App() {
   // Active view tracking for desktop navigation and mobile bottom tabs
   const [activeTab, setActiveTab] = useState('home');
 
+  // Helper to fetch JSON with automatic retry during server boots / network hiccups
+  const safeFetchJson = async (url: string, retries = 2, delayMs = 800): Promise<any> => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          return data;
+        }
+      } catch (err) {
+        if (attempt === retries) {
+          console.warn(`[Network Warning] Could not reach ${url}:`, err);
+          return null;
+        }
+        await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+      }
+    }
+    return null;
+  };
+
   // Load and refresh core site data from Express backend
   const loadData = async () => {
-    // 1. Fetch live public statistics and recent activity ticker
     try {
-      const resStats = await fetch('/api/stats');
-      const dataStats = await resStats.json();
-      if (dataStats.success) {
-        setStats(dataStats.stats);
-        setTickerActive(dataStats.tickerActive);
-        setRecentActivities(dataStats.recentActivities);
-      }
-    } catch (err) {
-      console.error('Failed to load stats data:', err);
-    }
+      const [statsData, vidsData, faqsData, adminData] = await Promise.all([
+        safeFetchJson('/api/stats'),
+        safeFetchJson('/api/videos'),
+        safeFetchJson('/api/faqs'),
+        safeFetchJson('/api/admin/data')
+      ]);
 
-    // 2. Fetch available videos
-    try {
-      const resVids = await fetch('/api/videos');
-      const dataVids = await resVids.json();
-      if (dataVids.success) {
-        setVideos(dataVids.videos);
+      if (statsData && statsData.success) {
+        setStats(statsData.stats);
+        setTickerActive(statsData.tickerActive);
+        setRecentActivities(statsData.recentActivities);
       }
-    } catch (err) {
-      console.error('Failed to load videos data:', err);
-    }
 
-    // 3. Fetch FAQs
-    try {
-      const resFaqs = await fetch('/api/faqs');
-      const dataFaqs = await resFaqs.json();
-      if (dataFaqs.success) {
-        setFaqs(dataFaqs.faqs);
+      if (vidsData && vidsData.success && Array.isArray(vidsData.videos) && vidsData.videos.length > 0) {
+        setVideos(vidsData.videos);
       }
-    } catch (err) {
-      console.error('Failed to load faqs data:', err);
-    }
 
-    // 4. Fetch all transactions (to sync with user's private wallet ledger)
-    try {
-      const resAdmin = await fetch('/api/admin/data');
-      const dataAdmin = await resAdmin.json();
-      if (dataAdmin.success) {
-        setTransactions(dataAdmin.transactions);
-        setDailyBonusAmount(dataAdmin.settings.dailyBonusAmount);
+      if (faqsData && faqsData.success && Array.isArray(faqsData.faqs) && faqsData.faqs.length > 0) {
+        setFaqs(faqsData.faqs);
+      }
+
+      if (adminData && adminData.success) {
+        if (Array.isArray(adminData.transactions)) {
+          setTransactions(adminData.transactions);
+        }
+        if (adminData.settings?.dailyBonusAmount) {
+          setDailyBonusAmount(adminData.settings.dailyBonusAmount);
+        }
       }
     } catch (err) {
-      console.error('Failed to load admin data:', err);
+      console.warn('[Site Data Sync Notice]:', err);
     }
   };
 
@@ -450,7 +457,7 @@ export default function App() {
         }
       }
     } catch (err) {
-      console.error('Failed to refresh user profile:', err);
+      console.warn('Could not refresh user profile temporarily:', err);
     }
   };
 

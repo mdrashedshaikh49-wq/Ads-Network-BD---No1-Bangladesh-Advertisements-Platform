@@ -657,6 +657,12 @@ app.use((req, res, next) => {
   // USER API ROUTES
   // ----------------------------------------
 
+  // Google AdSense Authorized Digital Sellers (ads.txt)
+  app.get(['/ads.txt', '/api/ads.txt'], (req, res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.send('google.com, pub-7330951402978812, DIRECT, f08c47fec0942fa0\n');
+  });
+
   // AI Chat Assistant (Customer Support)
   app.post('/api/chat/ai', async (req, res) => {
     try {

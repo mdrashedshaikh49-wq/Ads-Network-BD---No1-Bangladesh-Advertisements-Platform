@@ -11,7 +11,7 @@
       "destination": "/api/index.ts"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|ads\\.txt).*)",
       "destination": "/index.html"
     }
   ]
